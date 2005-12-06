@@ -12,12 +12,9 @@ require_once 'Core/Persistence/PersistenceTestSuite.php';
  * Window - Preferences - PHPeclipse - PHP - Code Templates
  */
 class AllTestSuites extends PHPUnit2_Framework_TestSuite {
-	
-	public function __construct() {
-		$this->addTest(new DomainTestSuite());
-		$this->addTest(new PersistenceTestSuite());
-		
-		#print_r($this);
-	}	
+    function __construct() {
+        $this->addTest(new DomainTestSuite());
+        $this->addTest(new PersistenceTestSuite());
+    }
 }
 ?>

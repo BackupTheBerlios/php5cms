@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . '/../../BaseTestSuite.php';
+require_once 'BaseTestSuite.php';
 
 /*
  * Created on 04.12.2005
@@ -8,7 +8,7 @@ require_once dirname(__FILE__) . '/../../BaseTestSuite.php';
  * Window - Preferences - PHPeclipse - PHP - Code Templates
  */
 class DomainTestSuite extends BaseTestSuite {
-	
+
 	public function __construct() {
 		$this->loadTestCases(dirname(__FILE__));
 	}

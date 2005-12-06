@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . '/BasePersistenceTestCase.php';
+require_once 'Core/Persistence/BasePersistenceTestCase.php';
 
 require_once 'XpCms/Core/Persistence/AbstractMapperFactory.php';
 require_once 'XpCms/Core/Persistence/Sql/SqlMapperFactory.php';
@@ -11,30 +11,30 @@ require_once 'XpCms/Core/Persistence/Sql/SqlMapperFactory.php';
  * Window - Preferences - PHPeclipse - PHP - Code Templates
  */
 class AbstractMapperFactoryTestCase extends BasePersistenceTestCase {
-	
+
 	/*
-	 * 
+	 *
 	 */
 	public function testGetInstance() {
 		$this->assertEquals('SqlMapperFactory', get_class($this->factory));
 		$this->assertEquals('AbstractMapperFactory', get_parent_class($this->factory));
 	}
-	
+
 	/*
 	 * Tries to set a property to to the factory an looks for it in the mapper
 	 */
 	public function testSetStatusToFactoryAndFindInMapper() {
-		
+
 		$this->factory->setProperty('status', 1);
-		
+
 		$mapper = $this->factory->createWebCollectionMapper();
-		
+
 		$this->assertNotNull($mapper->getProperty('status'));
 		$this->assertEquals(1, $mapper->getProperty('status'));
 	}
-	
+
 	/*
-	 * 
+	 *
 	 */
 	public function testGetInstanceFailsWithWrongType() {
 		try {
@@ -43,11 +43,11 @@ class AbstractMapperFactoryTestCase extends BasePersistenceTestCase {
 			$this->assertTrue(false, "An Exception was expected");
 		} catch (Exception $e) {
 			$this->assertTrue(true, "An Exception was expected");
-		}	
+		}
 	}
-	
+
 	/*
-	 * 
+	 *
 	 */
 	public function testGetInstanceFailsWithWrongDSN() {
 		try {
@@ -56,23 +56,23 @@ class AbstractMapperFactoryTestCase extends BasePersistenceTestCase {
 			$this->assertTrue(false, "An Exception was expected");
 		} catch (Exception $e) {
 			$this->assertTrue(true, "An Exception was expected");
-		}	
+		}
 	}
-	
+
 	/*
-	 * Sets a property value and tries to get it back. 
+	 * Sets a property value and tries to get it back.
 	 */
 	public function testSetAPropertyValue() {
 		$this->assertNull($this->factory->getProperty('foo'));
-		
+
 		$this->factory->setProperty('foo', 'bar');
-		
+
 		$this->assertNotNull($this->factory->getProperty('foo'));
 		$this->assertEquals('bar', $this->factory->getProperty('foo'));
-		
+
 		// Reset
 		$this->factory->setProperty('foo', null);
 	}
-		
+
 }
 ?>
