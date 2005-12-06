@@ -30,7 +30,7 @@ class WebCollectionTestCase extends BaseTestCase {
 		$webCollection->setId(2);
 		
 		$this->assertEquals(1, $webCollection->getId());
-	}	
+	}
 	
 }
 ?>

@@ -21,21 +21,11 @@ GROUP BY
   
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper 
     implements IWebCollectionMapper {
-    
-    /**
-     * The status field.
-     */	
-    	const STATUS_FIELD = 'status';
-    
-    /**
-     * The web page language.
-     */	
-    	const LANGUAGE_FIELD = 'language';
     
     /**
      * The raw table name for <code>WebCollection</code>s.
@@ -50,6 +40,20 @@ class WebCollectionMapper
      * @var string $pageTableName
      */	
     	private $pageTableName = 'web_page';
+    
+    /**
+     * The raw table name for <code>StructureGroup</code>s.
+     * 
+     * @var string $groupTableName
+     */	
+    	private $groupTableName = 'structure_group';
+    
+    /**
+     * The raw table name for the nested set informations of a group
+     * 
+     * @var string $nestedSetTableName
+     */	
+    	private $nestedSetTableName = 'structure_group_nested_set';
     	
 	/**
 	 * The constructor for this mapper. It takes a creole 
@@ -61,8 +65,12 @@ class WebCollectionMapper
 		parent::__construct($conn);
 		
 		// Prepare the raw table names.
-		$this->collTableName = $this->prepareTableName($this->collTableName);
-		$this->pageTableName = $this->prepareTableName($this->pageTableName);
+		$this->collTableName  = $this->prepareTableName($this->collTableName);
+		$this->pageTableName  = $this->prepareTableName($this->pageTableName);
+		$this->groupTableName = $this->prepareTableName($this->groupTableName);
+		
+		$this->nestedSetTableName = $this->prepareTableName(
+				$this->nestedSetTableName);
 	} 
 	
 	
@@ -76,16 +84,10 @@ class WebCollectionMapper
 	 * @param boolean $loadPage Load the associated web page and group.
 	 * @return mixed The <code>WebCollection</code> object or <code>null</code>.
 	 */
-	public function findById($id, $loadPage = false) {
+	public function findById($id, $loadPage = true) {
 		
-		$status = '1';
-		
-		$stat = $this->getProperty(self::STATUS_FIELD);
-		if (is_numeric($stat)) {
-			$status = $stat;
-		} else if (is_array($stat)) {
-			$status = implode(',', $stat);
-		}
+		// get the allowed status values.
+		$status = $this->getStatusSQL();
 		
 		// raw sql query string
 		if ($loadPage) {
@@ -150,9 +152,22 @@ class WebCollectionMapper
 				$webPage->setDescription($result->getString('wp_description'));
 				$webPage->setLanguage($result->getString('wp_language'));
 				$webPage->setStatus($result->getInt('wp_status'));
+				
+				$collection->setWebPage($webPage);
 			}
 		}
+		
+		$stmt->close();
+		$result->close();
+		
 		return $collection;
+	}
+	
+	/**
+	 * 
+	 */
+	public function findByGroup($group, $loadPage = true) {
+		
 	}
 }
 ?>

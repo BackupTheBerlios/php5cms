@@ -10,7 +10,7 @@ require_once dirname(__FILE__) . '/BasePersistenceTestCase.php';
  
 class MapperFactoryTestCase extends BasePersistenceTestCase {
 	
-	/**
+	/*
 	 * Checks that we can create an instance of IWebCollectionMapper
 	 */
 	public function testCreateWebCollectionMapper() {
@@ -20,6 +20,17 @@ class MapperFactoryTestCase extends BasePersistenceTestCase {
 		$this->assertTrue(
 			($mapper instanceof IWebCollectionMapper),
 			"Expected IWebCollectionMapper but  recieved " . get_class($mapper));
+	}
+	
+	/*
+	 * Creates an instance of IWebPageMapper
+	 */
+	public function testCreateWebPageMapper() {
+		
+		$mapper = $this->factory->createWebPageMapper();
+		
+		$this->assertNotNull($mapper);
+		$this->assertTrue($mapper instanceof IWebPageMapper);
 	}
 }
 ?>

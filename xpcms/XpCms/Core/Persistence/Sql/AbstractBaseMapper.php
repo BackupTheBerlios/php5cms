@@ -5,9 +5,19 @@
  * 
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 abstract class AbstractBaseMapper {
+    
+    /**
+     * The status field.
+     */	
+    	const STATUS_FIELD = 'status';
+    
+    /**
+     * The web page language.
+     */	
+    	const LANGUAGE_FIELD = 'language';
 	
 	/**
 	 * The used creole <code>Connection</code>-object.
@@ -64,6 +74,28 @@ abstract class AbstractBaseMapper {
 	 */
 	public function setProperty($name, $value) {
 		$this->properties->offsetSet($name, $value);
+	}
+	
+	/**
+	 * Returns a sql/string fragment with the chooseable status falgs.
+	 * 
+	 * @return string The allowed status flags.  
+	 */
+	protected function getStatusSQL() {
+		// By default just active items
+		$status = '1';
+		
+		// Is a custom value set?
+		$stat = $this->getProperty(self::STATUS_FIELD);
+		
+		// Any other status?
+		if (is_numeric($stat)) {
+			$status = $stat;
+		} else if (is_array($stat)) {
+			$status = implode(',', $stat);
+		}
+		
+		return $status;
 	}
 	
 	/**

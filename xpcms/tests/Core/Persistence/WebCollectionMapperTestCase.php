@@ -96,7 +96,14 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 		$mapper = $this->factory->createWebCollectionMapper();
 		$mapper->setProperty(WebCollectionMapper::LANGUAGE_FIELD, 'de_DE');
 		
-		$mapper->findById(1, true);
+		$collection = $mapper->findById(1);
+		
+		$this->assertNotNull($collection);
+		
+		$webPage = $collection->getWebPage();
+		
+		$this->assertNotNull($webPage);
+		$this->assertTrue($webPage instanceof WebPage);
 	}
 }
 ?>

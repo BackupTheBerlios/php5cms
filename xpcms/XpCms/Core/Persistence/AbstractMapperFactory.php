@@ -2,7 +2,7 @@
 /**
  * @package XpCms.Core.Persistence
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 abstract class AbstractMapperFactory implements IConfigurable {
 	
@@ -110,5 +110,13 @@ abstract class AbstractMapperFactory implements IConfigurable {
 	 * @return IWebCollectionMapper The collection mapper instance
 	 */
 	public abstract function createWebCollectionMapper();
+	
+	/**
+	 * Creates an instance of <code>IWebPageMapper</code>. This mapper is used 
+	 * to retries <code>WebPage</code>s from the database
+	 * 
+	 * @return IWebPageMapper The web page mapper instance.
+	 */
+	public abstract function createWebPageMapper();
 }
 ?>

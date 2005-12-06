@@ -2,6 +2,7 @@
 require_once dirname(__FILE__) . '/../../BaseTestCase.php';
 
 require_once 'XpCms/Core/Persistence/IConfigurable.php';
+require_once 'XpCms/Core/Persistence/IWebPageMapper.php';
 
 require_once 'XpCms/Core/Persistence/AbstractMapperFactory.php';
 require_once 'XpCms/Core/Persistence/Sql/SqlMapperFactory.php';

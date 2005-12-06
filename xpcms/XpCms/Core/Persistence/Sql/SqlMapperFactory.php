@@ -5,7 +5,7 @@ require_once 'creole/Creole.php';
 /**
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 class SqlMapperFactory extends AbstractMapperFactory {
 	
@@ -18,6 +18,15 @@ class SqlMapperFactory extends AbstractMapperFactory {
 	 * @var WebCollectionMapper
 	 */
 	private $webCollectionMapper = null;
+	
+	/**
+	 * An instance of <code>WebPageMapper</code>. By default it is not 
+	 * instanciated, but after a call of <code>createWebPageMapper()</code> it
+	 * holds an unique instance for later reuse.
+	 * 
+	 * @var WebPageMapper $webPageMapper
+	 */
+	private $webPageMapper = null;
 	
 	/**
 	 * The creole database collection
@@ -54,6 +63,29 @@ class SqlMapperFactory extends AbstractMapperFactory {
 							WebCollectionMapper::LANGUAGE_FIELD));
 		}
 		return $this->webCollectionMapper;
+	}
+	
+	/**
+	 * Creates an unique instance of <code>WebPageMapper</code>. This method 
+	 * implements the GoF Singleton pattern and the lazy load pattern.
+	 * 
+	 * @return WebPageMapper The WebPageMapper instance.
+	 */
+	public function createWebPageMapper() {
+		// Do we have an older instance?
+		if (is_null($this->webPageMapper)) {
+			// Include the class file.
+			include_once dirname(__FILE__) . '/WebPageMapper.php';
+			
+			$this->webPageMapper = new WebPageMapper($this->conn);
+			
+			// set some common properties
+			$this->initMapperProperties(
+					$this->webPageMapper, array(
+							WebPageMapper::STATUS_FIELD,
+							WebPageMapper::LANGUAGE_FIELD));
+		}
+		return $this->webPageMapper;
 	}
 	
 	/**
