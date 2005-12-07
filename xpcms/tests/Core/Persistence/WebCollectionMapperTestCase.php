@@ -120,6 +120,8 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
         $collections = $mapper->findByGroup($group);
 
         $this->assertNotNull($collections);
+        $this->assertTrue($collections instanceof ArrayObject);
+        $this->assertEquals(5, $collections->count());
     }
 }
 ?>

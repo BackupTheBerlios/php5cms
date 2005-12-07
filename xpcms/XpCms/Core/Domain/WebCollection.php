@@ -5,7 +5,7 @@
  * 
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class WebCollection extends DynamicPropertyObject implements IGroupable {
 	
@@ -32,6 +32,20 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 	private $webPage = null;
 	
 	/**
+	 * The parent <code>WebCollection</code>-instance.
+	 * 
+	 * @var WebCollection $parentCollection
+	 */
+	private $parentCollection;
+	
+	/**
+	 * The child <code>WebCollection</code>-instances.
+	 * 
+	 * @var ArrayObject $webCollections
+	 */
+	private $webCollections;
+		
+	/**
 	 * Simple constructor with no arguments.
 	 */
 	public function __construct() {
@@ -40,6 +54,66 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 					'name' => 'id',   'type' => 'integer', 'readonly' => true),
 			'Status' => array('name' => 'status', 'type' => 'integer')
 		));
+		// Init the collection container
+		$this->webCollections = new ArrayObject();
+	}
+	
+	/**
+	 * Returns the parent <code>WebCollection</code>-instance or a simple
+	 * <code>null</code> value if it doesn't exist.
+	 * 
+	 * @return mixed A WebCollection or null.
+	 */
+	public function getParentCollection() {
+		return $this->parentCollection;
+	}
+	
+	/**
+	 * Sets the parent <code>WebCollection</code> for this instance.
+	 */
+	public function setParentCollection(WebCollection $parentCollection) {
+		$this->parentCollection = $parentCollection;
+	}
+	
+	/**
+	 * This method returns all child collections for this one as an 
+	 * <code>ArrayObject</code>-object.
+	 * 
+	 * @return ArrayObject An ArrayObject with all child collections.
+	 */
+	public function getWebCollections() {
+		return $this->webCollections;
+	}
+	
+	/**
+	 * Adds a single <code>WebCollection</code> to this one. And removes it from
+	 * a parent if it is not <code>null</code>.
+	 * 
+	 * @param WebCollection $collection The new WebCollection.
+	 */
+	public function addWebCollection(WebCollection $collection) {
+		// Was a parent allready set?
+		if (($parent = $collection->getParentCollection()) != null) {
+			$parent->removeWebCollection($collection);
+		}
+		// Set this as parent
+		$collection->setParentCollection($this);
+		// Add object to list
+		$this->webCollections->append($collection);
+	}
+	
+	/**
+	 * Removes the given <code>$collection</code> from this instance.
+	 * 
+	 * @param WebCollection $collection The collection to remove.
+	 */
+	public function removeWebCollection(WebCollection $collection) {
+		foreach ($this->webCollections as $idx => $coll) {
+			if ($coll === $collection) {
+				$this->webCollections->offsetUnset($idx);
+				break;
+			}
+		}
 	}
 	
 	/**

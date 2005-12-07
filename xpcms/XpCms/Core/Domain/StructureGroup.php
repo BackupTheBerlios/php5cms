@@ -5,9 +5,16 @@
  *
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 class StructureGroup extends DynamicPropertyObject {
+	
+	/**
+	 * The unique identifier for this structure group.
+	 * 
+	 * @var integer $id
+	 */
+	protected $id;
 
     /**
      * Simple constructor that set's up the dynamic properties.

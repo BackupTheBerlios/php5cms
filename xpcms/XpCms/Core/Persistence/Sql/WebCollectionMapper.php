@@ -21,7 +21,7 @@ GROUP BY
 
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper
@@ -150,9 +150,17 @@ class WebCollectionMapper
 	}
 
 	/**
-	 *
+	 * This method finds all <code>WebCollection</code>s that belong to the
+	 * given <code>StructureGroup</code>. It also loads the associated 
+	 * <code>WebPage</code>s by default. You can remove this feature if you set
+	 * the second parameter <code>$loadPage</code> to <code>false</code>
+	 * 
+	 * @param StructureGroup $group The group to search for.
+	 * @param boolean $loadPage Should this method load the associated web pages
+	 *                          also? By default this is <code>true</code>.
+	 * @return ArrayObject This container holds all top level collections. 
 	 */
-	public function findByGroup($group, $loadPage = true) {
+	public function findByGroup(StructureGroup $group, $loadPage = true) {
 
         // get the allowed status values.
         $status = $this->getStatusSQL();
@@ -208,12 +216,12 @@ class WebCollectionMapper
                     $this->pageTableName,
                     $status);
         }
-
+		// language specific settings?
         $lang = $this->getProperty(self::LANGUAGE_FIELD);
         if ($lang !== null) {
             $sql .= " AND wp1.language = ?";
         }
-
+        
         $sql .= " GROUP BY sgns2.lft ASC";
 
         // Create a prepared statement
@@ -223,17 +231,80 @@ class WebCollectionMapper
 
         // lets execute
         $rs = $stmt->executeQuery();
+        
+        // last right value of the nested set
+        $lrgt = -1;
+        // array with tree path of right nested set values
+        $rgts = array();
 
+		// ArrayObject with all top level collections
         $collections = new ArrayObject();
+        // last parent collection
+        $parentColl  = null;
 
         while ($rs->next()) {
-            // TODO: LEFT RIGHT
-            // Hierarchie
-            $collections[] = $this->createCollectionFromRecord($rs);
+			// create collection from record
+            $collection = $this->createCollectionFromRecord($rs);
+          
+            $lft = $rs->getInt('lft');
+            $rgt = $rs->getInt('rgt');
+            
+            // Do we need to move up the tree?
+            if ($lrgt != -1 && $lft - 1 > $lrgt) {
+            		// find number of move up levels
+            		$moveUp = array_search($lft - 1, $rgts);
+            		// move up the object tree
+            		for ($i = 0; $i <= $moveUp; $i++) {
+            			$parentColl = $parentColl->getParentCollection();
+            		}
+            		// remove invalid right values.
+            		$rgts = array_slice($rgts, 0, $moveUp);
+            		
+            		if ($parentColl === null) {
+            			$lrgt = -1;
+            		}
+            }
+            
+            // Add to top level container or a nested parent?
+            if ($parentColl == null) {
+            		$collections->append($collection);	
+            } else {
+            		$parentColl->addWebCollection($collection);	
+            }
+            // keep current rgt in mind
+            $lrgt = $rgt;
+            // is this a not leaf of composite collection?
+            if ($rgt - $lft > 1) {
+            		$rgts[]      = $rgt;
+            		$parentColl = $collection;
+            }
         }
+        
+        return $collections;
+	}
+	
+	/**
+	 * This method inserts or updates the given <code>WebCollection</code> with
+	 * all its dependencies in the storage. If the <code>WebCollection</code>
+	 * doesn't contain a <code>WebPage</code> an empty dummy will be created 
+	 * also.
+	 * 
+	 * @param WebCollection $collection The new or changed WebCollection.
+	 * @see WebPageMapper::save() 
+	 */
+	public function save(WebCollection $collection) {
+		
 	}
 
-
+	/**
+	 * This method creates an instance of <code>WebCollection</code> from the 
+	 * given <code>ResultSet</code>-instance. If a matching <code>WebPage</code>
+	 * is also present in the given <code>RecordSet</code> it will be 
+	 * instantiated also.
+	 * 
+	 * @param ResultSet $rs The result set with the selected record.
+	 * @return WebCollection The object representation of the record.
+	 */
     private function createCollectionFromRecord(ResultSet $rs) {
         $collection = new WebCollection();
         $collection->setId($rs->getInt('id'));
