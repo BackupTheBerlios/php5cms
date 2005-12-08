@@ -123,5 +123,16 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
         $this->assertTrue($collections instanceof ArrayObject);
         $this->assertEquals(5, $collections->count());
     }
+    
+    /*
+     * Saves an allready existing WebCollection.
+     */
+    public function testSaveAChangedCollection() {
+    		$mapper = $this->factory->createWebCollectionMapper();
+    		$mapper->setProperty(WebCollectionMapper::LANGUAGE_FIELD, 'de_DE');
+    		
+    		$collection = $mapper->findById(7);
+    		print $collection->getWebPage()->getName();
+    }
 }
 ?>
