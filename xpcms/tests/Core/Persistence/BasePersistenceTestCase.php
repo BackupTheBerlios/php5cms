@@ -24,8 +24,6 @@ abstract class BasePersistenceTestCase extends BaseTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		// TODO: Import a clean database on each setup.
-
 		$this->factory = AbstractMapperFactory::getInstance(
 			$this->validType, $this->validDSN);
 	}

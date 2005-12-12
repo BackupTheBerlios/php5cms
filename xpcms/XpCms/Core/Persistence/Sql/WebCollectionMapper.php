@@ -21,7 +21,7 @@ GROUP BY
 
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper
@@ -98,21 +98,32 @@ class WebCollectionMapper
 						"   wp1.status AS wp_status," .
 						"   wp1.name AS wp_name," .
 						"   wp1.description AS wp_description," .
-						"   wp1.language AS wp_language " .
+						"   wp1.language AS wp_language," .
+						"   sgns1.group_fid " .
 						"FROM" .
-						"   %s AS col1, %s AS wp1 " .
+						"   %s AS col1, %s AS wp1, %s AS sgns1 " .
 						"WHERE " .
 						"   col1.id = ? AND col1.status IN (%s) AND" .
-						"   wp1.collection_fid = col1.id AND " .
+						"   wp1.collection_fid = col1.id AND" .
+						"   sgns1.collection_fid = col1.id AND" .
 						"   wp1.status IN (%s)",
-						$this->collTableName, $this->pageTableName,
+						$this->collTableName, 
+						$this->pageTableName,
+						$this->nestedSetTableName,
 						$status, $status);
 		} else {
 			$sql = sprintf(
-						"SELECT col1.id, col1.status FROM " .
-						"  %s AS col1, %s AS wp1 " .
-						"WHERE col1.id = ? AND col1.status IN (%s)",
-						$this->collTableName, $this->pageTableName, $status);
+						"SELECT" .
+						"  col1.id, col1.status, sgns1.group_fid " .
+						"FROM " .
+						"  %s AS col1, %s AS wp1, %s AS sgns1 " .
+						"WHERE" .
+						"  col1.id = ? AND col1.status IN (%s) AND" .
+						"  sgns1.collection_fid = col1.id",
+						$this->collTableName, 
+						$this->pageTableName,
+						$this->nestedSetTableName, 
+						$status);
 		}
 
 		// is a language available?
@@ -168,7 +179,8 @@ class WebCollectionMapper
         if ($loadPage) {
             $sql = sprintf(
                     "SELECT
-                       sgns2.lft, sgns2.rgt, wc1.status, wc1.id,
+                       sgns2.lft, sgns2.rgt, sgns2.group_fid,
+                       wc1.status, wc1.id,
                        wp1.id AS wp_id,
                        wp1.status AS wp_status,
                        wp1.name AS wp_name,
@@ -196,7 +208,8 @@ class WebCollectionMapper
         } else {
             $sql = sprintf(
                     "SELECT
-                       sgns2.lft, sgns2.rgt, wc1.status, wc1.id,
+                       sgns2.lft, sgns2.rgt, sgns2.group_fid,
+                       wc1.status, wc1.id,
                      FROM
                        %s AS sg1,
                        %s AS sgns1,
@@ -245,6 +258,7 @@ class WebCollectionMapper
         while ($rs->next()) {
 			// create collection from record
             $collection = $this->createCollectionFromRecord($rs);
+            $collection->setStructureGroup($group);
           
             $lft = $rs->getInt('lft');
             $rgt = $rs->getInt('rgt');
@@ -291,8 +305,184 @@ class WebCollectionMapper
 	 * 
 	 * @param WebCollection $collection The new or changed WebCollection.
 	 * @see WebPageMapper::save() 
+	 * 
+	 * @throws Exception If the given <code>WebCollection</code> doesn't belong
+	 *                   to a <code>StructureGroup</code> or it doesn't exist.
+	 *                   If the given <code>WebCollection</code> has a parent
+	 *                   that doesn't exist.
 	 */
 	public function save(WebCollection $collection) {
+		
+		// Get the StructureGroup and is it set?
+		$structureGroup = $collection->getStructureGroup();
+		if ($structureGroup === null) {
+			throw new Exception(
+                    'The given WebCollection has no StructureGroup');
+		}
+		
+		$parentId = -1;		
+		// Get the parent id. If it is a new root collection this id is -1.
+		if (($parentCollection = $collection->getParentCollection()) !== null) {
+			$parentId = $parentCollection->getId();
+		}
+		// Select the parent and the last child if it exists.
+		$sql = sprintf(
+               		'SELECT sgns1.lft, sgns1.rgt, sgns1.collection_fid FROM 
+			      	   %s AS sgns1, %s AS sgns2
+			         WHERE 
+			           (sgns1.group_fid = ? AND sgns1.collection_fid = ?)
+			           OR
+			           (sgns2.group_fid = ? AND sgns2.collection_fid = ? AND 
+			           sgns2.lft != sgns2.rgt - 1 AND sgns1.rgt = sgns2.rgt - 1)
+			         GROUP BY sgns1.collection_fid 
+                     ORDER BY sgns1.lft ASC',
+			    		$this->nestedSetTableName, $this->nestedSetTableName);
+	    
+	    // Prepare the sql query
+	    $stmt = $this->conn->prepareStatement($sql);
+
+	    // Set the params
+	    $stmt->setInt(1, $structureGroup->getId());
+	    $stmt->setInt(2, $parentId);
+	    $stmt->setInt(3, $structureGroup->getId());
+	    $stmt->setInt(4, $parentId);
+	    $stmt->setOffset(0);
+	    $stmt->setLimit(2);
+	    
+	    // Let's execute
+		$rs = $stmt->executeQuery();
+		
+		// If there is no result something was wrong
+		if (($recCount = $rs->getRecordCount()) == 0 || !$rs->first()) {
+			throw new Exception(
+				'Something goes wrong. Either the StructureGroup or the ' .
+				'parent WebCollection doesn\'t exist.');
+		}
+
+		$ctxEntry = array();
+		
+		// First child
+		if ($recCount == 1) {
+			
+			$ctxEntry = array(
+				'lft' => $rs->getInt('lft'),
+				'rgt' => $rs->getInt('rgt'),
+				'id'  => $rs->getInt('collection_fid')); 
+			
+			$update1 = sprintf(
+							'UPDATE %s
+					       	    SET lft       = lft + 2
+					          WHERE group_fid = ? 
+					            AND lft       > ?',
+					    		$this->nestedSetTableName);
+		    $update2 = sprintf(
+		    					'UPDATE %s
+		    					    SET rgt        = rgt + 2
+		    					  WHERE group_fid  = ?
+		    					    AND rgt       >= ?',
+		    					$this->nestedSetTableName);
+		    $insert1 = sprintf(
+		    					'INSERT INTO %s 
+		    					   (group_fid, collection_fid, lft, rgt)
+		    					 VALUES
+		    					   (?, ?, ?, ? + 1)',
+		    					$this->nestedSetTableName);
+			$insert2 = sprintf(
+							'INSERT INTO %s
+							   (id, status) VALUES (?, ?)',
+							$this->collTableName);
+		// Has a previous brother	
+		} else {
+			// Move to the second record
+			$rs->next();
+			
+			$ctxEntry = array(
+				'lft' => $rs->getInt('lft'),
+				'rgt' => $rs->getInt('rgt'),
+				'id'  => $rs->getInt('collection_fid'));
+			
+			$update1 = sprintf(
+							'UPDATE %s
+					       	    SET lft       = lft + 2
+					          WHERE group_fid = ? 
+					            AND lft       > ?',
+					    		$this->nestedSetTableName);
+		    $update2 = sprintf(
+		    					'UPDATE %s
+		    					    SET rgt        = rgt + 2
+		    					  WHERE group_fid  = ?
+		    					    AND rgt        > ?',
+		    					$this->nestedSetTableName);
+		    $insert1 = sprintf(
+		    					'INSERT INTO %s 
+		    					   (group_fid, collection_fid, lft, rgt)
+		    					 VALUES
+		    					   (?, ?, ? + 1, ? + 2)',
+		    					$this->nestedSetTableName);
+			$insert2 = sprintf(
+							'INSERT INTO %s
+							   (id, status) VALUES (?, ?)',
+							$this->collTableName);
+		}
+
+		$rs->close();
+		$stmt->close();
+		
+		try {
+			
+			$this->conn->begin();
+			
+			$id = $this->getNewPrimaryKey($this->collTableName, 'id');
+			
+			// Update left values
+			$stmt = $this->conn->prepareStatement($update1);
+			$stmt->setInt(1, $structureGroup->getId());
+			$stmt->setInt(2, $ctxEntry['rgt']);
+			$stmt->executeUpdate();
+			$stmt->close();
+			
+			// Update right values
+			$stmt = $this->conn->prepareStatement($update2);
+			$stmt->setInt(1, $structureGroup->getId());
+			$stmt->setInt(2, $ctxEntry['rgt']);
+			$stmt->executeUpdate();
+			$stmt->close();
+			
+			// Insert new nested set record
+			$stmt = $this->conn->prepareStatement($insert1);
+			$stmt->setInt(1, $structureGroup->getId());
+			$stmt->setInt(2, $id);
+			$stmt->setInt(3, $ctxEntry['rgt']);
+			$stmt->setInt(4, $ctxEntry['rgt']);
+			$stmt->executeUpdate();
+			$stmt->close();
+			
+			// Insert new collection
+			$stmt = $this->conn->prepareStatement($insert2);
+			$stmt->setInt(1, $id);
+			$stmt->setInt(2, $collection->getStatus());
+			$stmt->executeUpdate();
+			$stmt->close();		
+			
+			$this->conn->rollback();
+			#$this->conn->commit();
+		} catch (Exception $e) {
+			$this->conn->rollback();
+		}
+		
+	}
+	
+	/**
+	 * 
+	 */
+	public function saveBefore(WebCollection $collection, WebCollection $ctx) {
+		
+	}
+	
+	/**
+	 * 
+	 */
+	public function delete(WebCollection $collection) {
 		
 	}
 
@@ -309,6 +499,7 @@ class WebCollectionMapper
         $collection = new WebCollection();
         $collection->setId($rs->getInt('id'));
         $collection->setStatus($rs->getInt('status'));
+        $collection->setGroupId($rs->getInt('group_fid'));
 
         // Do we have the matching web page?
         if (array_key_exists('wp_id', $rs->getRow())) {

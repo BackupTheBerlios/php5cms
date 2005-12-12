@@ -3,8 +3,8 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Erstellungszeit: 05. Dezember 2005 um 07:42
--- Server Version: 4.1.14
+-- Erstellungszeit: 10. Dezember 2005 um 19:33
+-- Server Version: 4.1.15
 -- PHP-Version: 5.1.0RC7-dev
 -- 
 -- Datenbank: `xpcms`
@@ -206,13 +206,15 @@ INSERT INTO `xpcms_structure_group_nested_set` VALUES (1, 6, 7, 8);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 5, 2, 3);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 7, 4, 5);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 8, 6, 7);
-INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 9, 8, 17);
-INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 10, 9, 12);
-INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 11, 13, 14);
-INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 12, 15, 16);
-INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, -1, 1, 20);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 9, 8, 21);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 10, 9, 16);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 11, 17, 18);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 12, 19, 20);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, -1, 1, 24);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 14, 10, 11);
-INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 13, 18, 19);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 13, 22, 23);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 15, 12, 15);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 16, 13, 14);
 
 -- --------------------------------------------------------
 
@@ -224,7 +226,7 @@ CREATE TABLE `xpcms_web_collection` (
   `id` int(11) NOT NULL auto_increment,
   `status` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
 
 -- 
 -- Daten für Tabelle `xpcms_web_collection`
@@ -244,6 +246,8 @@ INSERT INTO `xpcms_web_collection` VALUES (11, 1);
 INSERT INTO `xpcms_web_collection` VALUES (12, 1);
 INSERT INTO `xpcms_web_collection` VALUES (13, 1);
 INSERT INTO `xpcms_web_collection` VALUES (14, 1);
+INSERT INTO `xpcms_web_collection` VALUES (15, 1);
+INSERT INTO `xpcms_web_collection` VALUES (16, 1);
 
 -- --------------------------------------------------------
 
@@ -259,7 +263,7 @@ CREATE TABLE `xpcms_web_page` (
   `language` varchar(5) NOT NULL default 'en_US',
   `status` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
 
 -- 
 -- Daten für Tabelle `xpcms_web_page`
@@ -279,6 +283,8 @@ INSERT INTO `xpcms_web_page` VALUES (11, 11, 'Carbon', 'Eine native XML-Datenban
 INSERT INTO `xpcms_web_page` VALUES (12, 12, 'XpCms', 'Mein erstes PHP5-CMS', 'de_DE', 1);
 INSERT INTO `xpcms_web_page` VALUES (13, 13, 'Impressum', 'Impressum', 'de_DE', 1);
 INSERT INTO `xpcms_web_page` VALUES (14, 14, 'apidoc', 'apidoc', 'de_DE', 1);
+INSERT INTO `xpcms_web_page` VALUES (15, 15, 'Umldoc', 'Die UML Dokumentation zum CMS', 'de_DE', 1);
+INSERT INTO `xpcms_web_page` VALUES (16, 16, 'Diagramme', 'Die einzelnen Diagramme nach ihren Typen', 'de_DE', 1);
 
 -- --------------------------------------------------------
 

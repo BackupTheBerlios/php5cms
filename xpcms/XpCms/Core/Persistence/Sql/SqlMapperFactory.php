@@ -5,7 +5,7 @@ require_once 'creole/Creole.php';
 /**
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class SqlMapperFactory extends AbstractMapperFactory {
 	
@@ -27,6 +27,16 @@ class SqlMapperFactory extends AbstractMapperFactory {
 	 * @var WebPageMapper $webPageMapper
 	 */
 	private $webPageMapper = null;
+	
+	/**
+	 * An instance of <code>StructureGroupMapper</code>. By default it is not 
+	 * instanciated, but after a call of 
+	 * <code>createStructureGroupMapper()</code> it holds an unique instance for
+	 * later reuse.
+	 * 
+	 * @var StructureGroupMapper $structureGroupMapper
+	 */
+	private $structureGroupMapper = null;
 	
 	/**
 	 * The creole database collection
@@ -73,7 +83,7 @@ class SqlMapperFactory extends AbstractMapperFactory {
 	 */
 	public function createWebPageMapper() {
 		// Do we have an older instance?
-		if (is_null($this->webPageMapper)) {
+		if ($this->webPageMapper === null) {
 			// Include the class file.
 			include_once dirname(__FILE__) . '/WebPageMapper.php';
 			
@@ -88,6 +98,29 @@ class SqlMapperFactory extends AbstractMapperFactory {
 		return $this->webPageMapper;
 	}
 	
+	/**
+	 * Creates an instance of <code>IStructureGroupMapper</code>. This mapper is
+	 * used to retrieve <code>StructureGroup</code>-objects from the underlying
+	 * storage.
+	 * 
+	 * @return IStructureGroup The <code>IStructureGroupMapper</code>-instance.
+	 */
+	public function createStructureGroupMapper() {
+		// Does an instance exist that we can reuse?
+		if ($this->structureGroupMapper === null) {
+			// Include the concrete php file
+			include_once dirname(__FILE__) . '/StructureGroupMapper.php';
+			// Create an instance
+			$this->structureGroupMapper = new StructureGroupMapper($this->conn);
+			// set some common properties
+			$this->initMapperProperties(
+					$this->structureGroupMapper, array(
+							StructureGroupMapper::STATUS_FIELD,
+							StructureGroupMapper::LANGUAGE_FIELD));
+		}
+		return $this->structureGroupMapper;
+	}
+		
 	/**
 	 * Adds allowed property values to the given <code>$mapper</code> object.
 	 * 

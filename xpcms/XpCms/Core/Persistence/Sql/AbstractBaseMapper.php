@@ -5,7 +5,7 @@
  * 
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 abstract class AbstractBaseMapper {
     
@@ -75,6 +75,46 @@ abstract class AbstractBaseMapper {
 	public function setProperty($name, $value) {
 		$this->properties->offsetSet($name, $value);
 	}
+	
+	/**
+	 * Simple helper method that reads the last primary key and returns this
+	 * value + 1.
+	 * 
+	 * @param string $tableName The lookup table.
+	 * @param string $idColumn The name of the primary key column.
+	 * @return integer The next free primary key or -1 if it is auto increment.
+	 */
+	protected function getNewPrimaryKey($tableName, $idColumn) {
+		
+		// Select the last sequence id
+		$sql = sprintf(
+				'SELECT MAX(%s) AS id FROM %s_sequence', $idColumn, $tableName);
+							   
+		$stmt = $this->conn->createStatement();
+		// While we cannot insert an incremented id
+		while (true) {
+			$rs = $stmt->executeQuery($sql);
+			$rs->first();
+			// Get current id
+			$id = $rs->getInt('id');
+			
+			$rs->close();
+			try {
+				// try to insert a new sequence id
+				$stmt->executeUpdate(sprintf(
+						'INSERT INTO %s_sequence (%s) VALUES (%s)',
+						$tableName, $idColumn, ++$id));
+				// Delete old records.
+				$stmt->executeUpdate(sprintf(
+						'DELETE FROM %s_sequence WHERE %s < %s',
+						$tableName, $idColumn, $id));
+				break;
+			} catch (Exception $e) {
+			}
+		}
+		// Return the new id
+		return $id;
+	} 
 	
 	/**
 	 * Returns a sql/string fragment with the chooseable status falgs.

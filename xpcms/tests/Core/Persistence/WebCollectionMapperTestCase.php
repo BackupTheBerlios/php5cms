@@ -7,6 +7,7 @@ require_once 'XpCms/Core/Domain/WebCollection.php';
 require_once 'XpCms/Core/Domain/WebPage.php';
 
 require_once 'XpCms/Core/Persistence/IConfigurable.php';
+require_once 'XpCms/Core/Persistence/IStructureGroupMapper.php';
 require_once 'XpCms/Core/Persistence/IWebCollectionMapper.php';
 require_once 'XpCms/Core/Persistence/Sql/AbstractBaseMapper.php';
 /*
@@ -127,12 +128,23 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
     /*
      * Saves an allready existing WebCollection.
      */
-    public function testSaveAChangedCollection() {
+    public function testSaveANewRootCollectionAtTheEndOfTheLevel() {
     		$mapper = $this->factory->createWebCollectionMapper();
     		$mapper->setProperty(WebCollectionMapper::LANGUAGE_FIELD, 'de_DE');
     		
-    		$collection = $mapper->findById(7);
-    		print $collection->getWebPage()->getName();
+    		$collection  = $mapper->findById(2);
+    		$structGroup = $collection->getStructureGroup();
+    		
+    		$this->assertNotNull($structGroup);
+    		
+    		$newColl = new WebCollection();
+    		$newColl->setStructureGroup($structGroup);
+    		
+    		$this->assertSame($structGroup, $newColl->getStructureGroup());
+    		$this->assertNull($newColl->getId());
+    		$this->assertNull($newColl->getWebPage());
+    		
+    		$mapper->save($newColl);
     }
 }
 ?>
