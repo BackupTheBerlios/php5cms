@@ -21,7 +21,7 @@ GROUP BY
 
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper
@@ -107,7 +107,7 @@ class WebCollectionMapper
 						"   wp1.collection_fid = col1.id AND" .
 						"   sgns1.collection_fid = col1.id AND" .
 						"   wp1.status IN (%s)",
-						$this->collTableName, 
+						$this->collTableName,
 						$this->pageTableName,
 						$this->nestedSetTableName,
 						$status, $status);
@@ -120,9 +120,9 @@ class WebCollectionMapper
 						"WHERE" .
 						"  col1.id = ? AND col1.status IN (%s) AND" .
 						"  sgns1.collection_fid = col1.id",
-						$this->collTableName, 
+						$this->collTableName,
 						$this->pageTableName,
-						$this->nestedSetTableName, 
+						$this->nestedSetTableName,
 						$status);
 		}
 
@@ -151,6 +151,7 @@ class WebCollectionMapper
 
 		// Is there a collection for the given id?
 		if ($result->getRecordCount() > 0 && $result->first()) {
+
 			$collection = $this->createCollectionFromRecord($result);
 		}
 
@@ -162,14 +163,14 @@ class WebCollectionMapper
 
 	/**
 	 * This method finds all <code>WebCollection</code>s that belong to the
-	 * given <code>StructureGroup</code>. It also loads the associated 
+	 * given <code>StructureGroup</code>. It also loads the associated
 	 * <code>WebPage</code>s by default. You can remove this feature if you set
 	 * the second parameter <code>$loadPage</code> to <code>false</code>
-	 * 
+	 *
 	 * @param StructureGroup $group The group to search for.
 	 * @param boolean $loadPage Should this method load the associated web pages
 	 *                          also? By default this is <code>true</code>.
-	 * @return ArrayObject This container holds all top level collections. 
+	 * @return ArrayObject This container holds all top level collections.
 	 */
 	public function findByGroup(StructureGroup $group, $loadPage = true) {
 
@@ -234,7 +235,7 @@ class WebCollectionMapper
         if ($lang !== null) {
             $sql .= " AND wp1.language = ?";
         }
-        
+
         $sql .= " GROUP BY sgns2.lft ASC";
 
         // Create a prepared statement
@@ -244,7 +245,7 @@ class WebCollectionMapper
 
         // lets execute
         $rs = $stmt->executeQuery();
-        
+
         // last right value of the nested set
         $lrgt = -1;
         // array with tree path of right nested set values
@@ -259,31 +260,38 @@ class WebCollectionMapper
 			// create collection from record
             $collection = $this->createCollectionFromRecord($rs);
             $collection->setStructureGroup($group);
-          
+
             $lft = $rs->getInt('lft');
             $rgt = $rs->getInt('rgt');
-            
+
             // Do we need to move up the tree?
             if ($lrgt != -1 && $lft - 1 > $lrgt) {
             		// find number of move up levels
             		$moveUp = array_search($lft - 1, $rgts);
+
+                    if ($moveUp == 0) {
+                        $moveUp = 1;
+                    }
+
             		// move up the object tree
-            		for ($i = 0; $i <= $moveUp; $i++) {
-            			$parentColl = $parentColl->getParentCollection();
+            		for ($i = 0; $i < $moveUp; $i++) {
+                        if (is_object($parentColl)) {
+            			     $parentColl = $parentColl->getParentCollection();
+                        }
             		}
             		// remove invalid right values.
             		$rgts = array_slice($rgts, 0, $moveUp);
-            		
+
             		if ($parentColl === null) {
             			$lrgt = -1;
             		}
             }
-            
+
             // Add to top level container or a nested parent?
             if ($parentColl == null) {
-            		$collections->append($collection);	
+            		$collections->append($collection);
             } else {
-            		$parentColl->addWebCollection($collection);	
+            		$parentColl->addWebCollection($collection);
             }
             // keep current rgt in mind
             $lrgt = $rgt;
@@ -293,51 +301,60 @@ class WebCollectionMapper
             		$parentColl = $collection;
             }
         }
-        
+
         return $collections;
 	}
-	
+
 	/**
 	 * This method inserts or updates the given <code>WebCollection</code> with
 	 * all its dependencies in the storage. If the <code>WebCollection</code>
-	 * doesn't contain a <code>WebPage</code> an empty dummy will be created 
+	 * doesn't contain a <code>WebPage</code> an empty dummy will be created
 	 * also.
-	 * 
+	 *
 	 * @param WebCollection $collection The new or changed WebCollection.
-	 * @see WebPageMapper::save() 
-	 * 
+	 * @see WebPageMapper::save()
+	 *
 	 * @throws Exception If the given <code>WebCollection</code> doesn't belong
 	 *                   to a <code>StructureGroup</code> or it doesn't exist.
 	 *                   If the given <code>WebCollection</code> has a parent
 	 *                   that doesn't exist.
+     *                   If the given <code>WebCollection</code> doesn't contain
+     *                   an instance of <code>WebPage</code>.
 	 */
 	public function save(WebCollection $collection) {
-		
+
 		// Get the StructureGroup and is it set?
 		$structureGroup = $collection->getStructureGroup();
 		if ($structureGroup === null) {
 			throw new Exception(
                     'The given WebCollection has no StructureGroup');
 		}
-		
-		$parentId = -1;		
+
+        // Get the default WebPage
+        $webPage = $collection->getWebPage();
+        if ($webPage === null) {
+            throw new Exception(
+                    'The given WebCollection has no WebPage.');
+        }
+
+		$parentId = -1;
 		// Get the parent id. If it is a new root collection this id is -1.
 		if (($parentCollection = $collection->getParentCollection()) !== null) {
 			$parentId = $parentCollection->getId();
 		}
 		// Select the parent and the last child if it exists.
 		$sql = sprintf(
-               		'SELECT sgns1.lft, sgns1.rgt, sgns1.collection_fid FROM 
+               		'SELECT sgns1.lft, sgns1.rgt, sgns1.collection_fid FROM
 			      	   %s AS sgns1, %s AS sgns2
-			         WHERE 
+			         WHERE
 			           (sgns1.group_fid = ? AND sgns1.collection_fid = ?)
 			           OR
-			           (sgns2.group_fid = ? AND sgns2.collection_fid = ? AND 
+			           (sgns2.group_fid = ? AND sgns2.collection_fid = ? AND
 			           sgns2.lft != sgns2.rgt - 1 AND sgns1.rgt = sgns2.rgt - 1)
-			         GROUP BY sgns1.collection_fid 
+			         GROUP BY sgns1.collection_fid
                      ORDER BY sgns1.lft ASC',
 			    		$this->nestedSetTableName, $this->nestedSetTableName);
-	    
+
 	    // Prepare the sql query
 	    $stmt = $this->conn->prepareStatement($sql);
 
@@ -348,10 +365,10 @@ class WebCollectionMapper
 	    $stmt->setInt(4, $parentId);
 	    $stmt->setOffset(0);
 	    $stmt->setLimit(2);
-	    
+
 	    // Let's execute
 		$rs = $stmt->executeQuery();
-		
+
 		// If there is no result something was wrong
 		if (($recCount = $rs->getRecordCount()) == 0 || !$rs->first()) {
 			throw new Exception(
@@ -360,19 +377,19 @@ class WebCollectionMapper
 		}
 
 		$ctxEntry = array();
-		
+
 		// First child
 		if ($recCount == 1) {
-			
+
 			$ctxEntry = array(
 				'lft' => $rs->getInt('lft'),
 				'rgt' => $rs->getInt('rgt'),
-				'id'  => $rs->getInt('collection_fid')); 
-			
+				'id'  => $rs->getInt('collection_fid'));
+
 			$update1 = sprintf(
 							'UPDATE %s
 					       	    SET lft       = lft + 2
-					          WHERE group_fid = ? 
+					          WHERE group_fid = ?
 					            AND lft       > ?',
 					    		$this->nestedSetTableName);
 		    $update2 = sprintf(
@@ -382,7 +399,7 @@ class WebCollectionMapper
 		    					    AND rgt       >= ?',
 		    					$this->nestedSetTableName);
 		    $insert1 = sprintf(
-		    					'INSERT INTO %s 
+		    					'INSERT INTO %s
 		    					   (group_fid, collection_fid, lft, rgt)
 		    					 VALUES
 		    					   (?, ?, ?, ? + 1)',
@@ -391,20 +408,20 @@ class WebCollectionMapper
 							'INSERT INTO %s
 							   (id, status) VALUES (?, ?)',
 							$this->collTableName);
-		// Has a previous brother	
+		// Has a previous brother
 		} else {
 			// Move to the second record
 			$rs->next();
-			
+
 			$ctxEntry = array(
 				'lft' => $rs->getInt('lft'),
 				'rgt' => $rs->getInt('rgt'),
 				'id'  => $rs->getInt('collection_fid'));
-			
+
 			$update1 = sprintf(
 							'UPDATE %s
 					       	    SET lft       = lft + 2
-					          WHERE group_fid = ? 
+					          WHERE group_fid = ?
 					            AND lft       > ?',
 					    		$this->nestedSetTableName);
 		    $update2 = sprintf(
@@ -414,7 +431,7 @@ class WebCollectionMapper
 		    					    AND rgt        > ?',
 		    					$this->nestedSetTableName);
 		    $insert1 = sprintf(
-		    					'INSERT INTO %s 
+		    					'INSERT INTO %s
 		    					   (group_fid, collection_fid, lft, rgt)
 		    					 VALUES
 		    					   (?, ?, ? + 1, ? + 2)',
@@ -427,27 +444,27 @@ class WebCollectionMapper
 
 		$rs->close();
 		$stmt->close();
-		
+
 		try {
-			
+
 			$this->conn->begin();
-			
+
 			$id = $this->getNewPrimaryKey($this->collTableName, 'id');
-			
+
 			// Update left values
 			$stmt = $this->conn->prepareStatement($update1);
 			$stmt->setInt(1, $structureGroup->getId());
 			$stmt->setInt(2, $ctxEntry['rgt']);
 			$stmt->executeUpdate();
 			$stmt->close();
-			
+
 			// Update right values
 			$stmt = $this->conn->prepareStatement($update2);
 			$stmt->setInt(1, $structureGroup->getId());
 			$stmt->setInt(2, $ctxEntry['rgt']);
 			$stmt->executeUpdate();
 			$stmt->close();
-			
+
 			// Insert new nested set record
 			$stmt = $this->conn->prepareStatement($insert1);
 			$stmt->setInt(1, $structureGroup->getId());
@@ -456,42 +473,152 @@ class WebCollectionMapper
 			$stmt->setInt(4, $ctxEntry['rgt']);
 			$stmt->executeUpdate();
 			$stmt->close();
-			
+
 			// Insert new collection
 			$stmt = $this->conn->prepareStatement($insert2);
 			$stmt->setInt(1, $id);
 			$stmt->setInt(2, $collection->getStatus());
 			$stmt->executeUpdate();
-			$stmt->close();		
-			
-			$this->conn->rollback();
-			#$this->conn->commit();
+			$stmt->close();
+
+            // Set the id for this collection.
+            $collection->setId($id);
+            // Create a IWebPageMapper instance
+            $wpm = AbstractMapperFactory::getInstance()->createWebPageMapper();
+            // Save the associated WebPage
+            $wpm->save($webPage);
+
+			#$this->conn->rollback();
+			$this->conn->commit();
 		} catch (Exception $e) {
 			$this->conn->rollback();
+
+            throw new Exception($e->getMessage(), $e->getCode());
 		}
-		
-	}
-	
-	/**
-	 * 
-	 */
-	public function saveBefore(WebCollection $collection, WebCollection $ctx) {
-		
-	}
-	
-	/**
-	 * 
-	 */
-	public function delete(WebCollection $collection) {
-		
+
 	}
 
 	/**
-	 * This method creates an instance of <code>WebCollection</code> from the 
+	 *
+	 */
+	public function saveBefore(WebCollection $collection, WebCollection $ctx) {
+
+	}
+
+    /**
+     * This method deletes a <code>WebCollection</code> from the underlying
+     * storage. If the given <code>WebCollection</code>-object contains other
+     * <code>WebCollection</code>s or <code>WebPage</code>s it will also delete
+     * them.
+     *
+     * Additional it removes the reference from the collection to its
+     * <code>StructureGroup</code>.
+     *
+     * @param WebCollection $collection The collection that will be removed.
+     * @see IWebPageMapper::delete()
+     *
+     * @throws Exception If the given <code>WebCollection</code> doesn't exist.
+     */
+	public function delete(WebCollection $collection) {
+
+        // Does the given collection contain an id?
+        if ($collection->getId() <= 0) {
+            throw new Exception('The given WebCollection doesn\'t exist.');
+        }
+
+        $sql = sprintf(
+                    'SELECT lft, rgt FROM %s WHERE collection_fid = ?',
+                    $this->nestedSetTableName);
+        // Create sql statement
+        $stmt = $this->conn->prepareStatement($sql);
+        // Set params
+        $stmt->setInt(1, $collection->getId());
+        $stmt->setLimit(1);
+
+        $rs = $stmt->executeQuery();
+        if ($rs->getRecordCount() < 1 || !$rs->first()) {
+            $rs->close();
+            $stmt->close();
+
+            throw new Exception('The given WebCollection doesn\'t exist.');
+        }
+
+        $lft = $rs->getInt('lft');
+        $rgt = $rs->getInt('rgt');
+
+        $move = floor(($rgt - $lft) / 2);
+        $move = 2 * ($move + 1);
+
+        $rs->close();
+        $stmt->close();
+
+        $groupId = $collection->getStructureGroup()->getId();
+
+        $delete1 = sprintf('DELETE FROM %s WHERE id = ?', $this->collTableName);
+        $delete2 = sprintf('DELETE FROM %s WHERE collection_fid = ?',
+                        $this->nestedSetTableName);
+        $update1 = sprintf(
+                        'UPDATE %s SET lft = lft - ?
+                         WHERE group_fid = ? AND lft > ?;',
+                        $this->nestedSetTableName);
+        $update2 = sprintf(
+                        'UPDATE %s SET rgt = rgt - ?
+                         WHERE group_fid = ? AND rgt > ?;',
+                        $this->nestedSetTableName);
+
+        try {
+            $this->conn->begin();
+
+            // Delete from collection table
+            $stmt = $this->conn->prepareStatement($delete1);
+            $stmt->setInt(1, $collection->getId());
+            $stmt->executeUpdate();
+            $stmt->close();
+
+            // Delete from nested set table
+            $stmt = $this->conn->prepareStatement($delete2);
+            $stmt->setInt(1, $collection->getId());
+            $stmt->executeUpdate();
+            $stmt->close();
+
+            // Update left values
+            $stmt = $this->conn->prepareStatement($update1);
+            $stmt->setInt(1, $move);
+            $stmt->setInt(2, $groupId);
+            $stmt->setInt(3, $rgt);
+            $stmt->executeUpdate();
+            $stmt->close();
+
+            // Update right values
+            $stmt = $this->conn->prepareStatement($update2);
+            $stmt->setInt(1, $move);
+            $stmt->setInt(2, $groupId);
+            $stmt->setInt(3, $rgt);
+            $stmt->executeUpdate();
+            $stmt->close();
+
+
+            $stmt = $this->conn->createStatement();
+            $stmt->executeUpdate("DELETE FROM xpcms_web_page WHERE collection_fid = " . $collection->getId());
+
+            // Remove the collection from it's parent if it is set
+            $parent = $collection->getParentCollection();
+            if ($parent !== null) {
+                $parent->removeWebCollection($collection);
+            }
+
+            $this->conn->commit();
+        } catch (Exception $e) {
+            $this->conn->rollback();
+        }
+	}
+
+	/**
+	 * This method creates an instance of <code>WebCollection</code> from the
 	 * given <code>ResultSet</code>-instance. If a matching <code>WebPage</code>
-	 * is also present in the given <code>RecordSet</code> it will be 
+	 * is also present in the given <code>RecordSet</code> it will be
 	 * instantiated also.
-	 * 
+	 *
 	 * @param ResultSet $rs The result set with the selected record.
 	 * @return WebCollection The object representation of the record.
 	 */
