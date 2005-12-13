@@ -21,7 +21,7 @@ GROUP BY
 
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper
@@ -246,18 +246,18 @@ class WebCollectionMapper
         // lets execute
         $rs = $stmt->executeQuery();
 
-        // last right value of the nested set
+       // last right value of the nested set
         $lrgt = -1;
         // array with tree path of right nested set values
         $rgts = array();
 
-		// ArrayObject with all top level collections
+        // ArrayObject with all top level collections
         $collections = new ArrayObject();
         // last parent collection
         $parentColl  = null;
 
         while ($rs->next()) {
-			// create collection from record
+            // create collection from record
             $collection = $this->createCollectionFromRecord($rs);
             $collection->setStructureGroup($group);
 
@@ -266,40 +266,59 @@ class WebCollectionMapper
             
             // Do we need to move up the tree?
             if ($lrgt != -1 && $lft - 1 > $lrgt) {
-            		// find number of move up levels
-            		$moveUp = array_search($lft - 1, $rgts);
+                    // find number of move up levels
+                    $moveUp = array_search($lft - 1, $rgts);
 
-            		// move up the object tree
-            		for ($i = sizeof($rgts) - 1; $i >= $moveUp; $i--) {
+                    // move up the object tree
+                    for ($i = sizeof($rgts) - 1; $i >= $moveUp; $i--) {
                     if (is_object($parentColl)) {
-            			     $parentColl = $parentColl->getParentCollection();
+                             $parentColl = $parentColl->getParentCollection();
                     }
-            		}
-            		// remove invalid right values.
-            		$rgts = array_slice($rgts, 0, $moveUp);
+                    }
+                    // remove invalid right values.
+                    $rgts = array_slice($rgts, 0, $moveUp);
 
-            		if ($parentColl === null) {
-            			$lrgt = -1;
-            		}
+                    if ($parentColl === null) {
+                        $lrgt = -1;
+                    }
             }
 
             // Add to top level container or a nested parent?
             if ($parentColl == null) {
-            		$collections->append($collection);
+                    $collections->append($collection);
             } else {
-            		$parentColl->addWebCollection($collection);
+                    $parentColl->addWebCollection($collection);
             }
             // keep current rgt in mind
             $lrgt = $rgt;
             // is this a not leaf of composite collection?
             if ($rgt - $lft > 1) {
-            		$rgts[]      = $rgt;
-            		$parentColl = $collection;
+                    $rgts[]      = $rgt;
+                    $parentColl = $collection;
             }
         }
+        
+        $rs->close();
+        $stmt->close();
 
         return $collections;
 	}
+    
+    /**
+     * This method finds all <code>WebCollection</code>s that belong to the 
+     * <code>StructureGroup</code> for the given <code>$groupAlias</code>. If 
+     * the second parameter is <code>true</code> it will also load the 
+     * associated <code>WebPage</code>-objects.
+     * 
+     * @param string $groupAlias The alias for the group.
+     * @param boolean $loadPage Should this method load the associated web pages
+     *                          also? By default this is <code>true</code>.
+     * @return ArrayObject This container holds all top level collections.
+     */
+    public function findByGroupAlias($groupAlias, $loadPage = true) {
+        
+        
+    }
 
 	/**
 	 * This method inserts or updates the given <code>WebCollection</code> with

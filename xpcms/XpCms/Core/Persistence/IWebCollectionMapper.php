@@ -3,7 +3,7 @@
 /**
  * @package XpCms.Core.Persistence
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 interface IWebCollectionMapper extends IConfigurable {
 	
@@ -31,6 +31,19 @@ interface IWebCollectionMapper extends IConfigurable {
 	 * @return ArrayObject This container holds all top level collections. 
 	 */
 	public function findByGroup(StructureGroup $group, $loadPage = true);
+    
+    /**
+     * This method finds all <code>WebCollection</code>s that belong to the 
+     * <code>StructureGroup</code> for the given <code>$groupAlias</code>. If 
+     * the second parameter is <code>true</code> it will also load the 
+     * associated <code>WebPage</code>-objects.
+     * 
+     * @param string $groupAlias The alias for the group.
+     * @param boolean $loadPage Should this method load the associated web pages
+     *                          also? By default this is <code>true</code>.
+     * @return ArrayObject This container holds all top level collections.
+     */
+    public function findByGroupAlias($groupAlias, $loadPage = true);
 	
 	/**
 	 * This method inserts or updates the given <code>WebCollection</code> with

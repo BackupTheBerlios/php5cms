@@ -2,9 +2,9 @@
 /**
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-abstract class DynamicPropertyObject {
+abstract class DynamicPropertyObject implements ArrayAccess {
 
 	/**
 	 * This array contains the valid dynPropNames for the concrete
@@ -104,6 +104,25 @@ abstract class DynamicPropertyObject {
 			}
 
 			$this->$property = $value;
+		}
+	}
+	
+	
+	public function offsetGet($name) {
+		return $this->$name;
+	}
+	
+	public function offsetSet($name, $value) {
+		$this->$name = $value;
+	}
+	
+	public function offsetExists($name) {
+		return isset($this->$name);
+	}
+	
+	public function offsetUnset($name) {
+		if ($this->offsetExists($name)) {
+			$this->$name = null;
 		}
 	}
 
