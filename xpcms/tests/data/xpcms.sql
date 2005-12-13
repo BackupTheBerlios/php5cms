@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Erstellungszeit: 10. Dezember 2005 um 19:33
+-- Erstellungszeit: 13. Dezember 2005 um 07:15
 -- Server Version: 4.1.15
--- PHP-Version: 5.1.0RC7-dev
+-- PHP-Version: 5.1.1
 -- 
 -- Datenbank: `xpcms`
 -- 
@@ -16,26 +16,29 @@
 -- Tabellenstruktur für Tabelle `xpcms_asset`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_asset`;
 CREATE TABLE `xpcms_asset` (
   `id` int(11) NOT NULL default '0',
+  `collection_fid` int(11) NOT NULL default '0',
   `language` varchar(5) NOT NULL default 'en_US',
   `position` float NOT NULL default '0',
   `name` varchar(64) NOT NULL default '',
   `description` text,
   `status` tinyint(1) NOT NULL default '0',
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  PRIMARY KEY  (`id`),
+  KEY `collection_fid` (`collection_fid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_asset`
 -- 
 
-INSERT INTO `xpcms_asset` VALUES (0, 'de_DE', 0, 'Prado-Website', 'Ein Link zur Webseite von Prado', 1);
-INSERT INTO `xpcms_asset` VALUES (1, 'de_DE', 1, 'Creole-Website', 'Ein Link zur Webseite von Creole', 1);
-INSERT INTO `xpcms_asset` VALUES (2, 'de_DE', 2, 'Link Sonst wohin', 'Ein Link ins Nirvana', 1);
-INSERT INTO `xpcms_asset` VALUES (3, 'de_DE', 0, 'Erster Text Block', 'Bla Bla Bla', 1);
-INSERT INTO `xpcms_asset` VALUES (4, 'de_DE', 1, 'Ein Bild', 'Bla Bla', 1);
-INSERT INTO `xpcms_asset` VALUES (5, 'de_DE', 2, 'Noch ein Text', 'Bla Bla Bla ', 1);
+INSERT INTO `xpcms_asset` VALUES (0, 0, 'de_DE', 0, 'Prado-Website', 'Ein Link zur Webseite von Prado', 1);
+INSERT INTO `xpcms_asset` VALUES (1, 0, 'de_DE', 1, 'Creole-Website', 'Ein Link zur Webseite von Creole', 1);
+INSERT INTO `xpcms_asset` VALUES (2, 0, 'de_DE', 2, 'Link Sonst wohin', 'Ein Link ins Nirvana', 1);
+INSERT INTO `xpcms_asset` VALUES (3, 0, 'de_DE', 0, 'Erster Text Block', 'Bla Bla Bla', 1);
+INSERT INTO `xpcms_asset` VALUES (4, 0, 'de_DE', 1, 'Ein Bild', 'Bla Bla', 1);
+INSERT INTO `xpcms_asset` VALUES (5, 0, 'de_DE', 2, 'Noch ein Text', 'Bla Bla Bla ', 1);
 
 -- --------------------------------------------------------
 
@@ -43,6 +46,7 @@ INSERT INTO `xpcms_asset` VALUES (5, 'de_DE', 2, 'Noch ein Text', 'Bla Bla Bla '
 -- Tabellenstruktur für Tabelle `xpcms_asset_comment`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_asset_comment`;
 CREATE TABLE `xpcms_asset_comment` (
   `asset_fid` int(11) NOT NULL default '0',
   `author` varchar(128) NOT NULL default '',
@@ -50,7 +54,7 @@ CREATE TABLE `xpcms_asset_comment` (
   `title` varchar(64) NOT NULL default '',
   `content` text NOT NULL,
   PRIMARY KEY  (`asset_fid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_asset_comment`
@@ -63,13 +67,14 @@ CREATE TABLE `xpcms_asset_comment` (
 -- Tabellenstruktur für Tabelle `xpcms_asset_download`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_asset_download`;
 CREATE TABLE `xpcms_asset_download` (
   `asset_fid` int(11) NOT NULL default '0',
   `url` varchar(255) NOT NULL default '',
   `title` varchar(255) NOT NULL default '',
   `description` text NOT NULL,
   PRIMARY KEY  (`asset_fid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_asset_download`
@@ -82,12 +87,13 @@ CREATE TABLE `xpcms_asset_download` (
 -- Tabellenstruktur für Tabelle `xpcms_asset_image`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_asset_image`;
 CREATE TABLE `xpcms_asset_image` (
   `asset_fid` int(11) NOT NULL default '0',
   `url` varchar(255) NOT NULL default '',
   `title` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`asset_fid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_asset_image`
@@ -101,13 +107,14 @@ INSERT INTO `xpcms_asset_image` VALUES (4, 'http://www.xplib.de/blog/img/collect
 -- Tabellenstruktur für Tabelle `xpcms_asset_link`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_asset_link`;
 CREATE TABLE `xpcms_asset_link` (
   `asset_fid` int(11) NOT NULL default '0',
   `url` varchar(255) NOT NULL default '',
   `title` varchar(255) NOT NULL default '',
   `description` text NOT NULL,
   PRIMARY KEY  (`asset_fid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_asset_link`
@@ -120,15 +127,34 @@ INSERT INTO `xpcms_asset_link` VALUES (2, 'http://nowhere.example.de', 'Ein Link
 -- --------------------------------------------------------
 
 -- 
+-- Tabellenstruktur für Tabelle `xpcms_asset_sequence`
+-- 
+
+DROP TABLE IF EXISTS `xpcms_asset_sequence`;
+CREATE TABLE `xpcms_asset_sequence` (
+  `id` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- 
+-- Daten für Tabelle `xpcms_asset_sequence`
+-- 
+
+INSERT INTO `xpcms_asset_sequence` VALUES (5);
+
+-- --------------------------------------------------------
+
+-- 
 -- Tabellenstruktur für Tabelle `xpcms_asset_text`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_asset_text`;
 CREATE TABLE `xpcms_asset_text` (
   `asset_fid` int(11) NOT NULL default '0',
   `title` varchar(255) NOT NULL default '',
   `content` text NOT NULL,
   PRIMARY KEY  (`asset_fid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_asset_text`
@@ -143,10 +169,11 @@ INSERT INTO `xpcms_asset_text` VALUES (5, 'Ein optimales Datenbank-Design', 'Zur
 -- Tabellenstruktur für Tabelle `xpcms_structure_group`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_structure_group`;
 CREATE TABLE `xpcms_structure_group` (
   `id` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_structure_group`
@@ -156,6 +183,7 @@ INSERT INTO `xpcms_structure_group` VALUES (1);
 INSERT INTO `xpcms_structure_group` VALUES (2);
 INSERT INTO `xpcms_structure_group` VALUES (3);
 INSERT INTO `xpcms_structure_group` VALUES (4);
+INSERT INTO `xpcms_structure_group` VALUES (5);
 
 -- --------------------------------------------------------
 
@@ -163,12 +191,14 @@ INSERT INTO `xpcms_structure_group` VALUES (4);
 -- Tabellenstruktur für Tabelle `xpcms_structure_group_detail`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_structure_group_detail`;
 CREATE TABLE `xpcms_structure_group_detail` (
   `group_fid` int(11) NOT NULL default '0',
   `language` varchar(5) NOT NULL default '',
   `name` varchar(64) NOT NULL default '',
-  `text` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  `text` text NOT NULL,
+  KEY `group_fid` (`group_fid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_structure_group_detail`
@@ -178,6 +208,7 @@ INSERT INTO `xpcms_structure_group_detail` VALUES (1, 'de_DE', 'Menü oben', 'Di
 INSERT INTO `xpcms_structure_group_detail` VALUES (2, 'de_DE', 'Menü links', 'Die baumartige Navigation links');
 INSERT INTO `xpcms_structure_group_detail` VALUES (3, 'de_DE', 'Inhalt Links', 'Weiterführende Links zum Inhalt der Webseite.');
 INSERT INTO `xpcms_structure_group_detail` VALUES (4, 'de_DE', 'Inhaltsbereich', 'In dieser Gruppe werden alle Bestandteile die zum Inhalt einer Seite gehören zusammengefasst.');
+INSERT INTO `xpcms_structure_group_detail` VALUES (5, 'de_DE', 'Admin Menü', 'Diese Gruppe definiert die sichtbaren Menüeinträge im Adminbereich');
 
 -- --------------------------------------------------------
 
@@ -185,13 +216,14 @@ INSERT INTO `xpcms_structure_group_detail` VALUES (4, 'de_DE', 'Inhaltsbereich',
 -- Tabellenstruktur für Tabelle `xpcms_structure_group_nested_set`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_structure_group_nested_set`;
 CREATE TABLE `xpcms_structure_group_nested_set` (
   `group_fid` int(11) NOT NULL default '0',
   `collection_fid` int(11) NOT NULL default '0',
   `lft` int(11) NOT NULL default '0',
   `rgt` int(11) NOT NULL default '0',
   KEY `group_id` (`group_fid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_structure_group_nested_set`
@@ -201,7 +233,7 @@ INSERT INTO `xpcms_structure_group_nested_set` VALUES (1, 1, 2, 3);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (1, 2, 4, 5);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (1, 3, 6, 9);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (1, 4, 10, 11);
-INSERT INTO `xpcms_structure_group_nested_set` VALUES (1, -1, 1, 14);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (1, -1, 1, 12);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (1, 6, 7, 8);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 5, 2, 3);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 7, 4, 5);
@@ -215,6 +247,9 @@ INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 14, 10, 11);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 13, 22, 23);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 15, 12, 15);
 INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 16, 13, 14);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (5, -1, 1, 6);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (5, 17, 2, 3);
+INSERT INTO `xpcms_structure_group_nested_set` VALUES (5, 18, 4, 5);
 
 -- --------------------------------------------------------
 
@@ -222,11 +257,12 @@ INSERT INTO `xpcms_structure_group_nested_set` VALUES (2, 16, 13, 14);
 -- Tabellenstruktur für Tabelle `xpcms_web_collection`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_web_collection`;
 CREATE TABLE `xpcms_web_collection` (
   `id` int(11) NOT NULL auto_increment,
   `status` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=280 ;
 
 -- 
 -- Daten für Tabelle `xpcms_web_collection`
@@ -248,6 +284,45 @@ INSERT INTO `xpcms_web_collection` VALUES (13, 1);
 INSERT INTO `xpcms_web_collection` VALUES (14, 1);
 INSERT INTO `xpcms_web_collection` VALUES (15, 1);
 INSERT INTO `xpcms_web_collection` VALUES (16, 1);
+INSERT INTO `xpcms_web_collection` VALUES (17, 1);
+INSERT INTO `xpcms_web_collection` VALUES (18, 1);
+
+-- --------------------------------------------------------
+
+-- 
+-- Tabellenstruktur für Tabelle `xpcms_web_collection_sequence`
+-- 
+
+DROP TABLE IF EXISTS `xpcms_web_collection_sequence`;
+CREATE TABLE `xpcms_web_collection_sequence` (
+  `id` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- 
+-- Daten für Tabelle `xpcms_web_collection_sequence`
+-- 
+
+INSERT INTO `xpcms_web_collection_sequence` VALUES (279);
+
+-- --------------------------------------------------------
+
+-- 
+-- Tabellenstruktur für Tabelle `xpcms_web_collection_to_group`
+-- 
+
+DROP TABLE IF EXISTS `xpcms_web_collection_to_group`;
+CREATE TABLE `xpcms_web_collection_to_group` (
+  `collection_fid` int(11) NOT NULL default '0',
+  `group_fid` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`collection_fid`),
+  KEY `group_fid` (`group_fid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- 
+-- Daten für Tabelle `xpcms_web_collection_to_group`
+-- 
+
 
 -- --------------------------------------------------------
 
@@ -255,6 +330,7 @@ INSERT INTO `xpcms_web_collection` VALUES (16, 1);
 -- Tabellenstruktur für Tabelle `xpcms_web_page`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_web_page`;
 CREATE TABLE `xpcms_web_page` (
   `id` int(11) NOT NULL auto_increment,
   `collection_fid` int(11) NOT NULL default '0',
@@ -263,7 +339,7 @@ CREATE TABLE `xpcms_web_page` (
   `language` varchar(5) NOT NULL default 'en_US',
   `status` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=348 ;
 
 -- 
 -- Daten für Tabelle `xpcms_web_page`
@@ -285,6 +361,26 @@ INSERT INTO `xpcms_web_page` VALUES (13, 13, 'Impressum', 'Impressum', 'de_DE', 
 INSERT INTO `xpcms_web_page` VALUES (14, 14, 'apidoc', 'apidoc', 'de_DE', 1);
 INSERT INTO `xpcms_web_page` VALUES (15, 15, 'Umldoc', 'Die UML Dokumentation zum CMS', 'de_DE', 1);
 INSERT INTO `xpcms_web_page` VALUES (16, 16, 'Diagramme', 'Die einzelnen Diagramme nach ihren Typen', 'de_DE', 1);
+INSERT INTO `xpcms_web_page` VALUES (17, 17, 'Struktur', 'In dieser Kollektion wird die sichtbare Struktur einer Webseite verwaltet', 'de_DE', 1);
+INSERT INTO `xpcms_web_page` VALUES (18, 18, 'Inhalte', 'In dieser Kollektion werden die Inhalte einer Webseite verwaltet.', 'de_DE', 1);
+
+-- --------------------------------------------------------
+
+-- 
+-- Tabellenstruktur für Tabelle `xpcms_web_page_sequence`
+-- 
+
+DROP TABLE IF EXISTS `xpcms_web_page_sequence`;
+CREATE TABLE `xpcms_web_page_sequence` (
+  `id` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- 
+-- Daten für Tabelle `xpcms_web_page_sequence`
+-- 
+
+INSERT INTO `xpcms_web_page_sequence` VALUES (347);
 
 -- --------------------------------------------------------
 
@@ -292,11 +388,12 @@ INSERT INTO `xpcms_web_page` VALUES (16, 16, 'Diagramme', 'Die einzelnen Diagram
 -- Tabellenstruktur für Tabelle `xpcms_web_page_to_asset`
 -- 
 
+DROP TABLE IF EXISTS `xpcms_web_page_to_asset`;
 CREATE TABLE `xpcms_web_page_to_asset` (
   `web_page_fid` int(11) NOT NULL default '0',
   `asset_fid` int(11) NOT NULL default '0',
   `group_fid` int(11) NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
 -- Daten für Tabelle `xpcms_web_page_to_asset`

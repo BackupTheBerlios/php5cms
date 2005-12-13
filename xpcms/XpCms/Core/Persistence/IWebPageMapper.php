@@ -5,9 +5,18 @@
  *
  * @package XpCms.Core.Persistence
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 interface IWebPageMapper extends IConfigurable {
+	
+	/**
+	 * This method returns a <code>WebPage</code>-object for the given id. If
+	 * there is no record for <code>$id</code> it will return <code>null</code>.
+	 * 
+	 * @param integer $id The <code>WebPage</code> identifier.
+	 * @return mixed A <code>WebPage</code>-instance or <code>null</code>. 
+	 */
+	public function findById($id);
 
 	/**
 	 * This method returns a <code>WebPage</code>-object for the given
@@ -38,5 +47,27 @@ interface IWebPageMapper extends IConfigurable {
      *                   <code>WebCollection</code>.
      */
     public function save(WebPage $webPage);
+    
+    /**
+     * This method removes the given <code>WebPage</code>-object from the 
+     * storage. 
+     * 
+     * @param WebPage $webPage The <code>WebPage</code> that should be removed.
+     * 
+     * @throws Exception If the given <code>WebPage</code> doesn't exist.
+     * 					 If the given <code>WebPage</code> is the last one that
+     *                   belongs to a <code>WebCollection</code>.
+     */
+    public function delete(WebPage $webPage);
+    
+    /**
+     * This method removes all <code>WebPage</code>-objects from the storage 
+     * that belong to the given <code>WebCollection</code>.
+     * 
+     * @param WebCollection $collection The context <code>WebCollection</code>.
+     * 
+     * @throws Exception If the given <code>WebCollection</code> doesn't exist.
+     */
+    public function deleteByCollection(WebCollection $collection);
 }
 ?>

@@ -14,9 +14,8 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 	 */
 	public function testGetCollectionWebPageThruMapper() {
 
-		$this->factory->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
-
 		$mapper1 = $this->factory->createWebCollectionMapper();
+		$mapper1->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
 
 		// Get Collection with no web page
 		$collection = $mapper1->findById(1, false);
@@ -38,6 +37,7 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 	public function testFindWebPageByItsCollectionForeignId() {
 
 		$mapper1 = $this->factory->createWebPageMapper();
+		$mapper1->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
 
 		$webPage = $mapper1->findByCollectionId(5);
 
@@ -48,5 +48,82 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 		$this->assertNotNull($collection);
 		$this->assertEquals($collection, $this->factory->createWebCollectionMapper()->findById(5));
 	}
+	
+	/*
+	 * This test tries to add a 'en_GB' web page to an existing collection. 
+	 */
+	public function testInsertANewCleanWebPageToAnExistingCollection() {
+		
+		$wpm     = $this->factory->createWebPageMapper();
+		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
+		$company = $wpm->findById(3);
+		
+		$engCompany = new WebPage();
+		$engCompany->setName('Company');
+		$engCompany->setDescription('About the company');
+		$engCompany->setStatus(1);
+		$engCompany->setLanguage('en_GB');
+		$engCompany->setCollection($company->getCollection());
+		
+		$this->assertNull($engCompany->getId());
+		
+		$wpm->save($engCompany);
+		
+		$this->assertNotNull($engCompany->getId());
+		
+		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'en_GB');
+		$queryPage = $wpm->findByCollection($engCompany->getCollection());
+		$this->assertEquals($engCompany->getId(), $queryPage->getId());
+		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
+		
+		$wpm->delete($engCompany);
+	}
+	
+	/*
+	 * This method changes an existing web page
+	 */
+	public function testUpdateAnExistingWebPage() {
+		$wpm     = $this->factory->createWebPageMapper();
+		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
+		$company = $wpm->findById(3);
+		
+		$orgDesc = $company->getDescription();
+		
+		$company->setDescription('Eine kleine Geschichte');
+		
+		$wpm->save($company);
+		
+		$company2 = $wpm->findById(3);
+		
+		$this->assertEquals('Eine kleine Geschichte', $company2->getDescription());
+		
+		$company2->setDescription($orgDesc);
+		
+		$wpm->save($company2);
+		
+		$company3 = $wpm->findById(3);
+		
+		$this->assertEquals($orgDesc, $company3->getDescription());
+		
+		$this->assertEquals($company->getId(), $company2->getId());
+		$this->assertEquals($company2->getId(), $company3->getId());
+	}
+	
+	/*
+	 * This test tries to delete the last web page of a collection, this test
+	 * must fail.
+	 */
+	public function testDeleteLastWebPageOfACollectionFails() {
+		
+		$wpm = $this->factory->createWebPageMapper();
+		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
+		
+		$webPage = $wpm->findById(3);
+		try {
+			$wpm->delete($webPage);
+			$this->fail('You cannot delete the last web page.');
+		} catch (Exception $e) {	}
+	}
+	
 }
 ?>

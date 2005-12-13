@@ -15,6 +15,10 @@
   <using namespace="XpCms.Pages" />
   <using namespace="XpCms.Core.Domain" />
   <using namespace="XpCms.Core.Persistence" />
+  
+  <module ID="WebContent" class="WebContentModule">
+    
+  </module>
 
   <module ID="User" class="DataModule">
     <using namespace="BlogApp.UserModule" />

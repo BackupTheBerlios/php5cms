@@ -21,7 +21,7 @@ GROUP BY
 
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper
@@ -263,21 +263,17 @@ class WebCollectionMapper
 
             $lft = $rs->getInt('lft');
             $rgt = $rs->getInt('rgt');
-
+            
             // Do we need to move up the tree?
             if ($lrgt != -1 && $lft - 1 > $lrgt) {
             		// find number of move up levels
             		$moveUp = array_search($lft - 1, $rgts);
 
-                    if ($moveUp == 0) {
-                        $moveUp = 1;
-                    }
-
             		// move up the object tree
-            		for ($i = 0; $i < $moveUp; $i++) {
-                        if (is_object($parentColl)) {
+            		for ($i = sizeof($rgts) - 1; $i >= $moveUp; $i--) {
+                    if (is_object($parentColl)) {
             			     $parentColl = $parentColl->getParentCollection();
-                        }
+                    }
             		}
             		// remove invalid right values.
             		$rgts = array_slice($rgts, 0, $moveUp);
@@ -597,9 +593,9 @@ class WebCollectionMapper
             $stmt->executeUpdate();
             $stmt->close();
 
-
-            $stmt = $this->conn->createStatement();
-            $stmt->executeUpdate("DELETE FROM xpcms_web_page WHERE collection_fid = " . $collection->getId());
+			
+			$wpm = AbstractMapperFactory::getInstance()->createWebPageMapper();
+			$wpm->deleteByCollection($collection);
 
             // Remove the collection from it's parent if it is set
             $parent = $collection->getParentCollection();

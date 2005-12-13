@@ -5,7 +5,7 @@
  *
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 class WebCollection extends DynamicPropertyObject implements IGroupable {
 
@@ -21,7 +21,7 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 	 *
 	 * @var integer $status
 	 */
-	protected $status = 1;
+	protected $status = 0;
 
 	/**
 	 * The foreign id of the structure group.
@@ -86,6 +86,8 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 
 	/**
 	 * Sets the parent <code>WebCollection</code> for this instance.
+	 * 
+	 * @param WebCollection $parentCollection The parent collection.
 	 */
 	public function setParentCollection(WebCollection $parentCollection) {
 		$this->parentCollection = $parentCollection;
@@ -146,8 +148,10 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 			$wpm = AbstractMapperFactory::getInstance()->createWebPageMapper();
 			// Find the web page by this collection
 			$this->webPage = $wpm->findByCollection($this);
-			// Set this a parent
-			$this->webPage->setCollection($this);
+			// Set this as parent
+			if ($this->webPage !== null) {
+				$this->webPage->setCollection($this);
+			}
 		}
 		return $this->webPage;
 	}
