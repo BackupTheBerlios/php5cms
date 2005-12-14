@@ -5,23 +5,26 @@
  * To change the template for this generated file go to
  * Window - Preferences - PHPeclipse - PHP - Code Templates
  */
-class BackendModule extends BaseXpCmsModule {
+class BackendModule extends XpCmsBaseModule {
     
     
     const BACKEND_MENU_ALIAS = 'BEMenuAlias';
+    
+    
+    private $config;
 
 
 	public function onLoad($param) {
 		parent::onLoad($param);
+        
+        $this->config = XpCmsConfig::getInstance();
 	}
 	
 	
 	public function getBackendMenu() {
-		$menuAlias = $this->Application->getUserParameter(self::BACKEND_MENU_ALIAS);
-        
-        $service = ContentService::getInstance(
-                            $this->persistenceType, $this->persistenceParam);
-        return $service->getWebCollectionsByAlias($menuAlias);        
+
+        $service = ContentService::getInstance();
+        return $service->getWebCollectionsByAlias($this->config->getMenuAlias());        
 	}	
 }
 ?>

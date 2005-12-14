@@ -13,6 +13,10 @@
   <parameter name="AvailableLanguages">de_DE,en_GB</parameter>
   <parameter name="DefaultLanguage">de_DE</parameter>
   
+  <parameter name="aliases">
+    <dummy name="foo" value="bar" />
+  </parameter>
+  
   <parameter name="BEMenuAlias">backend_menu</parameter>
   
   <using namespace="System.Web" />
