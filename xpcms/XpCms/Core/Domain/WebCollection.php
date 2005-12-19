@@ -5,7 +5,7 @@
  *
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 class WebCollection extends DynamicPropertyObject implements IGroupable {
 
@@ -15,6 +15,19 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 	 * @var integer $id
 	 */
 	protected $id;
+    
+    /**
+     * The alias name of this collection. This name could be used to create a 
+     * human readable url. In combination with the page<code>$language</code> it
+     * is possible to create a language specific link like the following one.
+     * 
+     * <code>
+     * collection.de_DE.html
+     * </code>
+     * 
+     * @var string $alias
+     */
+    protected $alias;
 
 	/**
 	 * The status of this web collection.
@@ -67,12 +80,32 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 		parent::__construct(array(
 			'Id'      => array(
 					'name' => 'id',   'type' => 'integer', 'readonly' => true),
+            'Alias'   => array('name' => 'alias', 'type' => 'string'),
 			'Status'  => array('name' => 'status', 'type' => 'integer'),
 			'GroupId' => array('name' => 'groupId', 'type' => 'integer')
 		));
 		// Init the collection container
 		$this->webCollections = new ArrayObject();
 	}
+    
+    public function getURL() {
+        $parts = array($this->getAlias());
+        
+        $collection       = $this;
+        $parentCollection = $collection->getParentCollection();
+        while ($parentCollection !== null) {
+            
+            $collection       = $parentCollection;
+            $parentCollection = $parentCollection->getParentCollection();
+            
+            $parts[] = $collection->getAlias();
+        }
+        
+        #$parts[] = $collection->getStructureGroup()->getAlias();
+        
+        return sprintf(
+            '/%s.%s.htm', implode('/', array_reverse($parts)), $this->getWebPage()->getLanguage());
+    }
 
 	/**
 	 * Returns the parent <code>WebCollection</code>-instance or a simple

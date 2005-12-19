@@ -4,7 +4,7 @@
  *
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
 
@@ -42,7 +42,7 @@ class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
 		
 		$sql = sprintf(
 					'SELECT
-					   id, collection_fid, name,description,language,status
+					   id, collection_fid,name,description,language,status
 					   FROM %s 
 					  WHERE
 					   id = ? AND status IN (%s)',

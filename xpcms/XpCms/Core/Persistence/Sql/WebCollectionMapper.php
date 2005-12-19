@@ -21,7 +21,7 @@ GROUP BY
 
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper
@@ -93,7 +93,7 @@ class WebCollectionMapper
 		if ($loadPage) {
 			$sql = sprintf(
 						"SELECT " .
-						"	col1.id, col1.status, " .
+						"	col1.id, col1.status, col1.alias, " .
 						"   wp1.id AS wp_id," .
 						"   wp1.status AS wp_status," .
 						"   wp1.name AS wp_name," .
@@ -114,7 +114,7 @@ class WebCollectionMapper
 		} else {
 			$sql = sprintf(
 						"SELECT" .
-						"  col1.id, col1.status, sgns1.group_fid " .
+						"  col1.id, col1.status, col1.alias, sgns1.group_fid " .
 						"FROM " .
 						"  %s AS col1, %s AS wp1, %s AS sgns1 " .
 						"WHERE" .
@@ -181,7 +181,7 @@ class WebCollectionMapper
             $sql = sprintf(
                     "SELECT
                        sgns2.lft, sgns2.rgt, sgns2.group_fid,
-                       wc1.status, wc1.id,
+                       wc1.status, wc1.id, wc1.alias, 
                        wp1.id AS wp_id,
                        wp1.status AS wp_status,
                        wp1.name AS wp_name,
@@ -210,7 +210,7 @@ class WebCollectionMapper
             $sql = sprintf(
                     "SELECT
                        sgns2.lft, sgns2.rgt, sgns2.group_fid,
-                       wc1.status, wc1.id,
+                       wc1.status, wc1.id, wc1.alias, 
                      FROM
                        %s AS sg1,
                        %s AS sgns1,
@@ -242,66 +242,8 @@ class WebCollectionMapper
         $stmt = $this->conn->prepareStatement($sql);
         $stmt->setInt(1, $group->getId());
         $stmt->setString(2, $lang);
-
-        // lets execute
-        $rs = $stmt->executeQuery();
-
-       // last right value of the nested set
-        $lrgt = -1;
-        // array with tree path of right nested set values
-        $rgts = array();
-
-        // ArrayObject with all top level collections
-        $collections = new ArrayObject();
-        // last parent collection
-        $parentColl  = null;
-
-        while ($rs->next()) {
-            // create collection from record
-            $collection = $this->createCollectionFromRecord($rs);
-            $collection->setStructureGroup($group);
-
-            $lft = $rs->getInt('lft');
-            $rgt = $rs->getInt('rgt');
-            
-            // Do we need to move up the tree?
-            if ($lrgt != -1 && $lft - 1 > $lrgt) {
-                    // find number of move up levels
-                    $moveUp = array_search($lft - 1, $rgts);
-
-                    // move up the object tree
-                    for ($i = sizeof($rgts) - 1; $i >= $moveUp; $i--) {
-                    if (is_object($parentColl)) {
-                             $parentColl = $parentColl->getParentCollection();
-                    }
-                    }
-                    // remove invalid right values.
-                    $rgts = array_slice($rgts, 0, $moveUp);
-
-                    if ($parentColl === null) {
-                        $lrgt = -1;
-                    }
-            }
-
-            // Add to top level container or a nested parent?
-            if ($parentColl == null) {
-                    $collections->append($collection);
-            } else {
-                    $parentColl->addWebCollection($collection);
-            }
-            // keep current rgt in mind
-            $lrgt = $rgt;
-            // is this a not leaf of composite collection?
-            if ($rgt - $lft > 1) {
-                    $rgts[]      = $rgt;
-                    $parentColl = $collection;
-            }
-        }
         
-        $rs->close();
-        $stmt->close();
-
-        return $collections;
+        return $this->createCollectionTreeFromStatement($stmt, $group);
 	}
     
     /**
@@ -317,7 +259,76 @@ class WebCollectionMapper
      */
     public function findByGroupAlias($groupAlias, $loadPage = true) {
         
+        // get the allowed status values.
+        $status = $this->getStatusSQL();
+
+        if ($loadPage) {
+            $sql = sprintf(
+                    "SELECT
+                       sgns2.lft, sgns2.rgt, sgns2.group_fid,
+                       wc1.status, wc1.id, wc1.alias, 
+                       wp1.id AS wp_id,
+                       wp1.status AS wp_status,
+                       wp1.name AS wp_name,
+                       wp1.description AS wp_description,
+                       wp1.language AS wp_language
+                     FROM
+                       %s AS sg1,
+                       %s AS sgns1,
+                       %s AS sgns2,
+                       %s AS wc1,
+                       %s AS wp1
+                     WHERE
+                       sg1.alias = ? AND
+                       sgns1.group_fid=sg1.id AND sgns1.collection_fid=-1 AND
+                       sgns2.group_fid=sg1.id AND
+                       sgns2.lft > sgns1.lft AND sgns2.rgt < sgns1.rgt AND
+                       wc1.id=sgns2.collection_fid AND wc1.status IN(%s) AND
+                       wp1.status IN(%s) AND wp1.collection_fid = wc1.id",
+                    $this->groupTableName,
+                    $this->nestedSetTableName,
+                    $this->nestedSetTableName,
+                    $this->collTableName,
+                    $this->pageTableName,
+                    $status, $status);
+        } else {
+            $sql = sprintf(
+                    "SELECT
+                       sgns2.lft, sgns2.rgt, sgns2.group_fid,
+                       wc1.status, wc1.id, wc1.alias, 
+                     FROM
+                       %s AS sg1,
+                       %s AS sgns1,
+                       %s AS sgns2,
+                       %s AS wc1,
+                       %s AS wp1
+                     WHERE
+                       sg1.alias = ? AND
+                       sgns1.group_fid=sg1.id AND sgns1.collection_fid=-1 AND
+                       sgns2.group_fid=sg1.id AND
+                       sgns2.lft > sgns1.lft AND sgns2.rgt < sgns1.rgt AND
+                       wc1.id=sgns2.collection_fid AND wc1.status IN(%s)",
+                    $this->groupTableName,
+                    $this->nestedSetTableName,
+                    $this->nestedSetTableName,
+                    $this->collTableName,
+                    $this->pageTableName,
+                    $status);
+        }
+        // language specific settings?
+        $lang = $this->getProperty(self::LANGUAGE_FIELD);
+        if ($lang !== null) {
+            $sql .= " AND wp1.language = ?";
+        }
+
+        $sql .= " GROUP BY sgns2.lft ASC";
+
+        // Create a prepared statement
+        $stmt = $this->conn->prepareStatement($sql);
+        $stmt->setString(1, $groupAlias);
+        $stmt->setString(2, $lang);
         
+        return $this->createCollectionTreeFromStatement($stmt);
     }
 
 	/**
@@ -421,7 +432,7 @@ class WebCollectionMapper
 		    					$this->nestedSetTableName);
 			$insert2 = sprintf(
 							'INSERT INTO %s
-							   (id, status) VALUES (?, ?)',
+							   (id, status, alias) VALUES (?, ?, ?)',
 							$this->collTableName);
 		// Has a previous brother
 		} else {
@@ -453,7 +464,7 @@ class WebCollectionMapper
 		    					$this->nestedSetTableName);
 			$insert2 = sprintf(
 							'INSERT INTO %s
-							   (id, status) VALUES (?, ?)',
+							   (id, status, alias) VALUES (?, ?, ?)',
 							$this->collTableName);
 		}
 
@@ -493,6 +504,7 @@ class WebCollectionMapper
 			$stmt = $this->conn->prepareStatement($insert2);
 			$stmt->setInt(1, $id);
 			$stmt->setInt(2, $collection->getStatus());
+            $stmt->setString(3, (string) $collection->getAlias());
 			$stmt->executeUpdate();
 			$stmt->close();
 
@@ -627,6 +639,86 @@ class WebCollectionMapper
             $this->conn->rollback();
         }
 	}
+    
+    /**
+     * This method creates a collection tree from the given sql
+     * <code>Statement</code>. It returns an <code>ArrayAccess</code>-object 
+     * with all top level collections.
+     * 
+     * @param PreparedStatement $stmt A <code>PreparedStatement</code>-instance.
+     * @param StructureGroup $group A <code>StructureGroup</code>-instance or
+     *                              <code>null</code>.
+     * @return ArrayAccess An instance of <code>ArrayAccess</code>.
+     */
+    private function createCollectionTreeFromStatement($stmt, $group = null) {
+        
+        // lets execute
+        $rs = $stmt->executeQuery();
+
+       // last right value of the nested set
+        $lrgt = -1;
+        // array with tree path of right nested set values
+        $rgts = array();
+
+        // Declare the collections variable
+        $collections = null;
+        // last parent collection
+        $parentColl  = null;
+        
+        if ($rs->getRecordCount() > 0) {
+            // ArrayObject with all top level collections
+            $collections = new ArrayObject();            
+        }
+        
+        while ($rs->next()) {
+            // create collection from record
+            $collection = $this->createCollectionFromRecord($rs);
+            if ($group !== null) {
+                $collection->setStructureGroup($group);
+            }
+
+            $lft = $rs->getInt('lft');
+            $rgt = $rs->getInt('rgt');
+            
+            // Do we need to move up the tree?
+            if ($lrgt != -1 && $lft - 1 > $lrgt) {
+                    // find number of move up levels
+                    $moveUp = array_search($lft - 1, $rgts);
+
+                    // move up the object tree
+                    for ($i = sizeof($rgts) - 1; $i >= $moveUp; $i--) {
+                    if (is_object($parentColl)) {
+                             $parentColl = $parentColl->getParentCollection();
+                    }
+                    }
+                    // remove invalid right values.
+                    $rgts = array_slice($rgts, 0, $moveUp);
+
+                    if ($parentColl === null) {
+                        $lrgt = -1;
+                    }
+            }
+
+            // Add to top level container or a nested parent?
+            if ($parentColl == null) {
+                    $collections->append($collection);
+            } else {
+                    $parentColl->addWebCollection($collection);
+            }
+            // keep current rgt in mind
+            $lrgt = $rgt;
+            // is this a not leaf of composite collection?
+            if ($rgt - $lft > 1) {
+                    $rgts[]      = $rgt;
+                    $parentColl = $collection;
+            }
+        }
+        
+        $rs->close();
+        $stmt->close();
+
+        return $collections;
+    }
 
 	/**
 	 * This method creates an instance of <code>WebCollection</code> from the
@@ -641,6 +733,7 @@ class WebCollectionMapper
         $collection = new WebCollection();
         $collection->setId($rs->getInt('id'));
         $collection->setStatus($rs->getInt('status'));
+        $collection->setAlias($rs->getString('alias'));
         $collection->setGroupId($rs->getInt('group_fid'));
 
         // Do we have the matching web page?

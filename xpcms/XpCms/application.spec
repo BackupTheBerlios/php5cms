@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <application ID="XpCMS" state="debug">
 
-	<request default="HomePage" format="get" />
+	<request class="XpCmsRequest" default="HomePage" format="ext_path" />
 
 	<session enabled="true" />
 
   <cache enabled="true" />
 
-  <parameter name="PersistenceType">Sql</parameter>
-  <parameter name="PersistenceParam">mysql://xpcms:xpcms@localhost/xpcms</parameter>
-  
-  <parameter name="AvailableLanguages">de_DE,en_GB</parameter>
-  <parameter name="DefaultLanguage">de_DE</parameter>
-  
-  <parameter name="aliases">
-    <dummy name="foo" value="bar" />
+  <parameter name="alias">
+    <alias name="backend_menu" value="backend" />
+    <alias name="website_structure" value="web_site" />
   </parameter>
   
-  <parameter name="BEMenuAlias">backend_menu</parameter>
+  <parameter name="persistence">
+    <persistence name="content" type="Sql" dsn="mysql://xpcms:xpcms@localhost/xpcms" />
+  </parameter>
+  
+  <parameter name="language">
+    <standard lang="de_DE" />
+    <available lang="de_DE,en_GB" />
+  </parameter>
   
   <using namespace="System.Web" />
   <using namespace="System.Web.UI" />
@@ -32,7 +34,8 @@
   <using namespace="XpCms.Core.Service" />
   
   <module ID="WebContent" class="WebContentModule">
-
+    <using namespace="XpCms.WebContent" />
+    <using namespace="XpCms.Backend" />
   </module>
   
   <module ID="Backend" class="BackendModule">

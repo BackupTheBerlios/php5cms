@@ -214,6 +214,36 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 
 		$this->assertEquals($count, $collection->getWebCollections()->count());
 	}
+    
+    /*
+     * This method tries to find a WebCollection group by its alias name with
+     * success.
+     */
+    public function testFindAWebCollectionGroupByItsAliasName() {
+        
+        $mapper = $this->factory->createWebCollectionMapper();
+        $mapper->setProperty(WebCollectionMapper :: LANGUAGE_FIELD, 'de_DE');
+
+        $collections = $mapper->findByGroupAlias('backend');
+        $this->assertNotNull($collections);
+        $this->assertTrue($collections->count() > 0);
+        
+        $this->assertNotNull($structureGroup = $collections->offsetGet(0)->getStructureGroup());
+        $this->assertEquals('backend', $structureGroup->getAlias());
+    }
+    
+    /*
+     * Tries to find a not existing collection group. the expected return value
+     * is null.
+     */
+    public function testDoNotFindAWebCollectionByANotExistingAlias() {
+        $mapper = $this->factory->createWebCollectionMapper();
+        $mapper->setProperty(WebCollectionMapper :: LANGUAGE_FIELD, 'de_DE');
+
+        $collections = $mapper->findByGroupAlias('not_existing_group');
+        
+        $this->assertNull($collections);        
+    }
 }
 ?>
 

@@ -5,7 +5,7 @@
  *
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class StructureGroup extends DynamicPropertyObject {
 	
@@ -15,6 +15,14 @@ class StructureGroup extends DynamicPropertyObject {
 	 * @var integer $id
 	 */
 	protected $id;
+    
+    /**
+     * The human readable alias name of this <code>StructureGroup</code> or
+     * <code>null</code> if it is not set.
+     * 
+     * @var string $alias
+     */
+    protected $alias = null;
 	
 	/**
 	 * The current language for the group description.
@@ -44,6 +52,7 @@ class StructureGroup extends DynamicPropertyObject {
         parent::__construct(array(
              'Id' => array(
             	  		'name' => 'id', 'type' => 'integer', 'readonly' => true),
+             'Alias'       => array('name' => 'alias', 'type' => 'string'),
              'Language'    => array('name' => 'language', 'type' => 'string'),
              'Name'        => array('name' => 'Name', 'type' => 'string'),
              'Description' => array('name' => 'description', 'type' => 'string')

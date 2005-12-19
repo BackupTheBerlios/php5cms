@@ -5,7 +5,7 @@ require_once 'creole/Creole.php';
 /**
  * @package XpCms.Core.Persistence.Sql
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class SqlMapperFactory extends AbstractMapperFactory {
 	
@@ -47,7 +47,7 @@ class SqlMapperFactory extends AbstractMapperFactory {
 	
 	protected function __construct($dsn) {
 		parent::__construct();
-		
+        
 		$this->conn = Creole::getConnection($dsn);
 	}
 	

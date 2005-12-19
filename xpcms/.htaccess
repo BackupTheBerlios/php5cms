@@ -1,0 +1,14 @@
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^(.+)/([^_^/]+:[^_^/]+)\.([a-z][a-z]_[A-Z][A-Z])\.(htm|html)$ /index.php?page=$2&alias=$1/$2&lang=$3 [PT,QSA]
+RewriteRule ^(.+)/([^_^/]+:[^_^/]+)/([^:]+)\.([a-z][a-z]_[A-Z][A-Z])\.(htm|html)$ /index.php?page=$2&alias=$1/$2/$3&lang=$4 [PT,QSA]
+RewriteRule ^([^_^/]+:[^_^/]+)\.([a-z][a-z]_[A-Z][A-Z])\.(htm|html)$ /index.php?page=$1&alias=$1&lang=$2 [PT,QSA]
+
+
+RewriteRule ([^/]+)/([^_^/]+)_([^_^/]+)\.([a-z][a-z]_[A-Z][A-Z])\.(htm|html)$ /index.php?page=$2:$3&alias=$1/$2/$3&lang=$4 [PT,QSA]
+
+RewriteRule ([^/]+)/([^/]*)/(.*)\.([a-z][a-z]_[A-Z][A-Z])\.(htm|html)$ /index.php?page=$1:$2&alias=$1/$2/$3&lang=$3 [PT,QSA]
+RewriteRule ([^/]*)/([^/]*)/(.*)\.(htm|html)$ /index.php?page=$1:$2&alias=$1/$2/$3 [PT,QSA]
+RewriteRule ([^/]+)/(.*)\.([a-z][a-z]_[A-Z][A-Z])\.(htm|html)$ /index.php?page=$1:$2&alias=$1/$2&lang=$3 [PT,QSA]
+RewriteRule ([^/]*)/(.*)\.(htm|html)$ /index.php?page=$1:$2&alias=$1/$2 [PT,QSA]

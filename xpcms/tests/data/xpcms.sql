@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Erstellungszeit: 13. Dezember 2005 um 07:15
+-- Erstellungszeit: 19. Dezember 2005 um 07:20
 -- Server Version: 4.1.15
 -- PHP-Version: 5.1.1
 -- 
@@ -172,6 +172,7 @@ INSERT INTO `xpcms_asset_text` VALUES (5, 'Ein optimales Datenbank-Design', 'Zur
 DROP TABLE IF EXISTS `xpcms_structure_group`;
 CREATE TABLE `xpcms_structure_group` (
   `id` int(11) NOT NULL default '0',
+  `alias` varchar(255) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -179,11 +180,12 @@ CREATE TABLE `xpcms_structure_group` (
 -- Daten für Tabelle `xpcms_structure_group`
 -- 
 
-INSERT INTO `xpcms_structure_group` VALUES (1);
-INSERT INTO `xpcms_structure_group` VALUES (2);
-INSERT INTO `xpcms_structure_group` VALUES (3);
-INSERT INTO `xpcms_structure_group` VALUES (4);
-INSERT INTO `xpcms_structure_group` VALUES (5);
+INSERT INTO `xpcms_structure_group` VALUES (0, NULL);
+INSERT INTO `xpcms_structure_group` VALUES (1, NULL);
+INSERT INTO `xpcms_structure_group` VALUES (2, 'web_site');
+INSERT INTO `xpcms_structure_group` VALUES (3, NULL);
+INSERT INTO `xpcms_structure_group` VALUES (4, NULL);
+INSERT INTO `xpcms_structure_group` VALUES (5, 'backend');
 
 -- --------------------------------------------------------
 
@@ -261,31 +263,32 @@ DROP TABLE IF EXISTS `xpcms_web_collection`;
 CREATE TABLE `xpcms_web_collection` (
   `id` int(11) NOT NULL auto_increment,
   `status` tinyint(1) NOT NULL default '0',
+  `alias` varchar(128) NOT NULL default '',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=280 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=602 ;
 
 -- 
 -- Daten für Tabelle `xpcms_web_collection`
 -- 
 
-INSERT INTO `xpcms_web_collection` VALUES (1, 1);
-INSERT INTO `xpcms_web_collection` VALUES (2, 1);
-INSERT INTO `xpcms_web_collection` VALUES (3, 1);
-INSERT INTO `xpcms_web_collection` VALUES (4, 1);
-INSERT INTO `xpcms_web_collection` VALUES (5, 1);
-INSERT INTO `xpcms_web_collection` VALUES (6, 1);
-INSERT INTO `xpcms_web_collection` VALUES (7, 1);
-INSERT INTO `xpcms_web_collection` VALUES (8, 1);
-INSERT INTO `xpcms_web_collection` VALUES (9, 1);
-INSERT INTO `xpcms_web_collection` VALUES (10, 1);
-INSERT INTO `xpcms_web_collection` VALUES (11, 1);
-INSERT INTO `xpcms_web_collection` VALUES (12, 1);
-INSERT INTO `xpcms_web_collection` VALUES (13, 1);
-INSERT INTO `xpcms_web_collection` VALUES (14, 1);
-INSERT INTO `xpcms_web_collection` VALUES (15, 1);
-INSERT INTO `xpcms_web_collection` VALUES (16, 1);
-INSERT INTO `xpcms_web_collection` VALUES (17, 1);
-INSERT INTO `xpcms_web_collection` VALUES (18, 1);
+INSERT INTO `xpcms_web_collection` VALUES (1, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (2, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (3, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (4, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (5, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (6, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (7, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (8, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (9, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (10, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (11, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (12, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (13, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (14, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (15, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (16, 1, '');
+INSERT INTO `xpcms_web_collection` VALUES (17, 1, 'WebContent:Structure');
+INSERT INTO `xpcms_web_collection` VALUES (18, 1, 'WebContent:Asset');
 
 -- --------------------------------------------------------
 
@@ -303,7 +306,7 @@ CREATE TABLE `xpcms_web_collection_sequence` (
 -- Daten für Tabelle `xpcms_web_collection_sequence`
 -- 
 
-INSERT INTO `xpcms_web_collection_sequence` VALUES (279);
+INSERT INTO `xpcms_web_collection_sequence` VALUES (601);
 
 -- --------------------------------------------------------
 
@@ -334,12 +337,12 @@ DROP TABLE IF EXISTS `xpcms_web_page`;
 CREATE TABLE `xpcms_web_page` (
   `id` int(11) NOT NULL auto_increment,
   `collection_fid` int(11) NOT NULL default '0',
-  `name` varchar(64) NOT NULL default '',
+  `name` varchar(64) default NULL,
   `description` text NOT NULL,
   `language` varchar(5) NOT NULL default 'en_US',
   `status` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=348 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=841 ;
 
 -- 
 -- Daten für Tabelle `xpcms_web_page`
@@ -380,7 +383,7 @@ CREATE TABLE `xpcms_web_page_sequence` (
 -- Daten für Tabelle `xpcms_web_page_sequence`
 -- 
 
-INSERT INTO `xpcms_web_page_sequence` VALUES (347);
+INSERT INTO `xpcms_web_page_sequence` VALUES (840);
 
 -- --------------------------------------------------------
 

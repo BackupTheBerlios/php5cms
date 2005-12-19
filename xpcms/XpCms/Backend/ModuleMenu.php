@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Created on 13.12.2005
  *
@@ -6,12 +7,15 @@
  * Window - Preferences - PHPeclipse - PHP - Code Templates
  */
 class ModuleMenu extends TPanel {
-	
-	public function onInit($param) {
-		parent::onInit($param);
-		
-		$collections = $this->Module->getBackendMenu();		
 
-	}	
+	public function onLoad($param) {
+		parent :: onLoad($param);
+        
+        $module = pradoGetApplication()->loadModule('Backend');
+
+        $this->BackendMenu->setDataSource($module->getBackendMenu());
+        $this->BackendMenu->dataBind();
+	}
 }
 ?>
+

@@ -1,6 +1,8 @@
 <?php
 require_once 'BaseTestCase.php';
 
+require_once 'creole/Statement.php';
+
 require_once 'XpCms/Core/Persistence/IConfigurable.php';
 require_once 'XpCms/Core/Persistence/IWebPageMapper.php';
 

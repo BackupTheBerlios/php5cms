@@ -10,8 +10,11 @@ if (!function_exists('using')) {
 	PATH_SEPARATOR . dirname(__FILE__));
 	
 	// Just for prado compatibility
-	function using() {}
+	#function using() {}
 }
+
+require_once 'prado/framework/prado.php';
+pradoGetApplication('../XpCms/application.spec');
 
 /*
  * Created on 04.12.2005

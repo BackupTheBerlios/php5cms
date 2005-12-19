@@ -7,7 +7,9 @@
  */
 interface IXpCmsConstants {
     
-    const BACKEND_MENU_ALIAS = 'BEMenuAlias';
+    const BACKEND_MENU_ALIAS = 'backend_menu';
+    
+    const WEBSITE_STRUCTURE_ALIAS = 'website_structure';
     
     const PERSISTENCE_TYPE = 'PersistenceType';
     
