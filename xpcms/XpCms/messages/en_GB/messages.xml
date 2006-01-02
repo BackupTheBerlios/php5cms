@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file original="XpCms Messages" source-language="EN" datatype="plaintext" date="2005-09-15T21:02:10Z">
+    <body>
+      
+      <trans-unit id="1">
+        <source>Website Properties</source>
+     		<target />
+      </trans-unit>
+      
+      <trans-unit id="2">
+        <source>Title:</source>
+        <target />
+      </trans-unit>
+      
+      <trans-unit id="3">
+        <source>Description:</source>
+        <target />
+      </trans-unit>
+      
+      <trans-unit id="4">
+        <source>Alias:</source>
+        <target />
+      </trans-unit>
+      
+      <trans-unit id="5">
+        <source>Website Assets</source>
+        <target />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
