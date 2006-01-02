@@ -1,9 +1,7 @@
-#Sun Dec 18 10:30:45 CET 2005
+#Fri Dec 30 11:37:43 CET 2005
 eclipse.preferences.version=1
 encoding//XpCms/Backend/BackendView.tpl=UTF-8
 encoding//XpCms/Backend/ModuleMenu.tpl=UTF-8
 encoding//XpCms/application.spec=UTF-8
-encoding//lib/prado/examples/RentalWizard/application.spec=UTF-8
-encoding//lib/prado/examples/blog/application.spec=UTF-8
-encoding//lib/prado/examples/phonebook/application.spec=UTF-8
-encoding//lib/prado/framework/TComponent.spec=UTF-8
+encoding//lib/prado/examples/I18N/application.spec=UTF-8
+encoding//lib/prado/framework/Web/UI/WebControls/THtmlArea.spec=UTF-8
