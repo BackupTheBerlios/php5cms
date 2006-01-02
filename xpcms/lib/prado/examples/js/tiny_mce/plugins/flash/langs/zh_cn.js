@@ -1,7 +1,11 @@
-// Simplified Chinese lang variables contributed by cube316 (cube316@etang.com)
+// Simplified Chinese lang variables contributed by tom_cat (thomaswangyang@gmail.com)
 
-tinyMCELang['lang_insert_flash']      = '插入/编辑 Flash电影';
-tinyMCELang['lang_insert_flash_file'] = 'Flash文件(.swf)';
-tinyMCELang['lang_insert_flash_size'] = '尺寸';
-tinyMCELang['lang_insert_flash_list'] = 'Flash files';
-tinyMCELang['lang_flash_props'] = 'Flash properties';
+tinyMCE.addToLang('flash',{
+title : '插入/编辑 Flash电影',
+desc : 'Flash电影描述',
+file : 'Flash插件(.swf)',
+size : '尺寸',
+list : 'Flash插件列表',
+props : 'Flash属性',
+general : '一般'
+});
