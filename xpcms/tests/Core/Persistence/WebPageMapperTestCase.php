@@ -15,10 +15,9 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 	public function testGetCollectionWebPageThruMapper() {
 
 		$mapper1 = $this->factory->createWebCollectionMapper();
-		$mapper1->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
 
 		// Get Collection with no web page
-		$collection = $mapper1->findById(1, false);
+		$collection = $mapper1->findById(1, 'de_DE', 1, false);
 
 		$this->assertNotNull($collection);
 
@@ -37,16 +36,15 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 	public function testFindWebPageByItsCollectionForeignId() {
 
 		$mapper1 = $this->factory->createWebPageMapper();
-		$mapper1->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
 
-		$webPage = $mapper1->findByCollectionId(5);
+		$webPage = $mapper1->findByCollectionId(5, 'de_DE');
 
 		$this->assertNotNull($webPage);
 
 		$collection = $webPage->getCollection();
 
 		$this->assertNotNull($collection);
-		$this->assertEquals($collection, $this->factory->createWebCollectionMapper()->findById(5));
+		$this->assertEquals($collection, $this->factory->createWebCollectionMapper()->findById(5, 'de_DE'));
 	}
 	
 	/*
@@ -55,7 +53,7 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 	public function testInsertANewCleanWebPageToAnExistingCollection() {
 		
 		$wpm     = $this->factory->createWebPageMapper();
-		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
+		$wpm->setProperty(IConfigurable::LANGUAGE, 'de_DE');
 		$company = $wpm->findById(3);
 		
 		$engCompany = new WebPage();
@@ -71,10 +69,9 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 		
 		$this->assertNotNull($engCompany->getId());
 		
-		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'en_GB');
-		$queryPage = $wpm->findByCollection($engCompany->getCollection());
+		$queryPage = $wpm->findByCollectionId($engCompany->getCollection()->getId(), 'en_GB');
 		$this->assertEquals($engCompany->getId(), $queryPage->getId());
-		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
+		$wpm->setProperty(IConfigurable::LANGUAGE, 'de_DE');
 		
 		$wpm->delete($engCompany);
 	}
@@ -84,7 +81,7 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 	 */
 	public function testUpdateAnExistingWebPage() {
 		$wpm     = $this->factory->createWebPageMapper();
-		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
+		$wpm->setProperty(IConfigurable::LANGUAGE, 'de_DE');
 		$company = $wpm->findById(3);
 		
 		$orgDesc = $company->getDescription();
@@ -116,7 +113,7 @@ class WebPageMapperTestCase extends BasePersistenceTestCase {
 	public function testDeleteLastWebPageOfACollectionFails() {
 		
 		$wpm = $this->factory->createWebPageMapper();
-		$wpm->setProperty(WebPageMapper::LANGUAGE_FIELD, 'de_DE');
+		$wpm->setProperty(IConfigurable::LANGUAGE, 'de_DE');
 		
 		$webPage = $wpm->findById(3);
 		try {

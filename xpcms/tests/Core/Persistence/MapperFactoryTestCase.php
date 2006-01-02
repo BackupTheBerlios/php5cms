@@ -1,6 +1,8 @@
 <?php
 require_once 'Core/Persistence/BasePersistenceTestCase.php';
 
+require_once 'XpCms/Core/Persistence/IAssetMapper.php';
+
 /*
  * Created on 23.11.2005
  *
@@ -32,5 +34,15 @@ class MapperFactoryTestCase extends BasePersistenceTestCase {
 		$this->assertNotNull($mapper);
 		$this->assertTrue($mapper instanceof IWebPageMapper);
 	}
+    
+    /*
+     * Creates an instance of IAssetMapper
+     */
+    public function testCreateAnInstanceOfAssetMapper() {
+        $mapper = $this->factory->createAssetMapper();
+        
+        $this->assertNotNull($mapper);
+        $this->assertTrue($mapper instanceof IAssetMapper);
+    }
 }
 ?>

@@ -5,9 +5,9 @@ require_once 'PHPUnit2/Framework/Warning.php';
 if (!function_exists('using')) {
 	// Setup include path
 	set_include_path(get_include_path() . 
-	PATH_SEPARATOR . dirname(__FILE__) . '/../lib/' . 
-	PATH_SEPARATOR . dirname(__FILE__) . '/../' .
-	PATH_SEPARATOR . dirname(__FILE__));
+	PATH_SEPARATOR . realpath(dirname(__FILE__) . '/../lib/') . 
+	PATH_SEPARATOR . realpath(dirname(__FILE__) . '/../') .
+	PATH_SEPARATOR . realpath(dirname(__FILE__)));
 	
 	// Just for prado compatibility
 	#function using() {}

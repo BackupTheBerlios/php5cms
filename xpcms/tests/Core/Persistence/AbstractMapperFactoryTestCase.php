@@ -2,7 +2,7 @@
 require_once 'Core/Persistence/BasePersistenceTestCase.php';
 
 require_once 'XpCms/Core/Persistence/AbstractMapperFactory.php';
-require_once 'XpCms/Core/Persistence/Sql/SqlMapperFactory.php';
+require_once 'XpCms/Core/Persistence/Creole/CreoleMapperFactory.php';
 
 /*
  * Created on 22.11.2005
@@ -16,7 +16,7 @@ class AbstractMapperFactoryTestCase extends BasePersistenceTestCase {
 	 *
 	 */
 	public function testGetInstance() {
-		$this->assertEquals('SqlMapperFactory', get_class($this->factory));
+		$this->assertEquals('CreoleMapperFactory', get_class($this->factory));
 		$this->assertEquals('AbstractMapperFactory', get_parent_class($this->factory));
 	}
 

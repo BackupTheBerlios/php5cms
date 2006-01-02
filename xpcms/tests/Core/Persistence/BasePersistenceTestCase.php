@@ -7,7 +7,7 @@ require_once 'XpCms/Core/Persistence/IConfigurable.php';
 require_once 'XpCms/Core/Persistence/IWebPageMapper.php';
 
 require_once 'XpCms/Core/Persistence/AbstractMapperFactory.php';
-require_once 'XpCms/Core/Persistence/Sql/SqlMapperFactory.php';
+require_once 'XpCms/Core/Persistence/Creole/CreoleMapperFactory.php';
 
 
 /*
@@ -18,7 +18,7 @@ require_once 'XpCms/Core/Persistence/Sql/SqlMapperFactory.php';
  */
 abstract class BasePersistenceTestCase extends BaseTestCase {
 
-	protected $validType = 'Sql';
+	protected $validType = 'Creole';
 	protected $validDSN  = 'mysql://xpcms:xpcms@localhost/xpcms';
 
 	protected $factory = null;

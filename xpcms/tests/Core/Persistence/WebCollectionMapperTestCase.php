@@ -1,6 +1,8 @@
 <?php
 require_once 'Core/Persistence/BasePersistenceTestCase.php';
 
+require_once 'XpCms/Core/Service/LazyLoadService.php';
+
 require_once 'XpCms/Core/Domain/IGroupable.php';
 require_once 'XpCms/Core/Domain/StructureGroup.php';
 require_once 'XpCms/Core/Domain/WebCollection.php';
@@ -9,7 +11,7 @@ require_once 'XpCms/Core/Domain/WebPage.php';
 require_once 'XpCms/Core/Persistence/IConfigurable.php';
 require_once 'XpCms/Core/Persistence/IStructureGroupMapper.php';
 require_once 'XpCms/Core/Persistence/IWebCollectionMapper.php';
-require_once 'XpCms/Core/Persistence/Sql/AbstractBaseMapper.php';
+require_once 'XpCms/Core/Persistence/Creole/AbstractBaseMapper.php';
 /*
  * Created on 24.11.2005
  *
@@ -25,7 +27,7 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 	public function testFindByIdSuccess() {
 
 		$mapper = $this->factory->createWebCollectionMapper();
-		$collection = $mapper->findById(1);
+		$collection = $mapper->findById(1, 'de_DE');
 
 		$this->assertNotNull($collection);
 		$this->assertEquals('WebCollection', get_class($collection));
@@ -38,13 +40,13 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 
 		$mapper = $this->factory->createWebCollectionMapper();
 
-		$collection = $mapper->findById(-1);
+		$collection = $mapper->findById(-1, 'de_DE');
 		$this->assertNull($collection);
 
-		$collection = $mapper->findById('foo');
+		$collection = $mapper->findById('foo', 'de_DE');
 		$this->assertNull($collection);
 
-		$collection = $mapper->findById('; DELETE FROM xpcms_web_collection WHERE 1');
+		$collection = $mapper->findById('; DELETE FROM xpcms_web_collection WHERE 1', 'de_DE');
 		$this->assertNull($collection);
 	}
 
@@ -54,16 +56,7 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 	public function testDoNotFindACollectionWithIdOneAndStatusZero() {
 
 		$mapper = $this->factory->createWebCollectionMapper();
-
-		// get current status
-		$status = $mapper->getProperty(WebCollectionMapper :: STATUS_FIELD);
-
-		$mapper->setProperty(WebCollectionMapper :: STATUS_FIELD, 0);
-
-		$result = $mapper->findById(1);
-
-		// restore status
-		$mapper->setProperty(WebCollectionMapper :: STATUS_FIELD, $status);
+		$result = $mapper->findById(1, 'de_DE', 0);
 
 		$this->assertNull($result);
 	}
@@ -74,16 +67,8 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 	public function testFindCollectionWithIdFiveAndStatusOne() {
 
 		$mapper = $this->factory->createWebCollectionMapper();
-
-		// get current status
-		$status = $mapper->getProperty(WebCollectionMapper :: STATUS_FIELD);
-
-		$mapper->setProperty(WebCollectionMapper :: STATUS_FIELD, 1);
-
-		$result = $mapper->findById(5);
-
-		// restore status
-		$mapper->setProperty(WebCollectionMapper :: STATUS_FIELD, $status);
+        
+		$result = $mapper->findById(5, 'de_DE', 1);
 
 		$this->assertNotNull($result);
 		$this->assertEquals('WebCollection', get_class($result));
@@ -95,9 +80,8 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 	public function testFindCollectionWithGermanWebPage() {
 
 		$mapper = $this->factory->createWebCollectionMapper();
-		$mapper->setProperty(WebCollectionMapper :: LANGUAGE_FIELD, 'de_DE');
 
-		$collection = $mapper->findById(1);
+		$collection = $mapper->findById(1, 'de_DE');
 
 		$this->assertNotNull($collection);
 
@@ -112,16 +96,12 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 	 */
 	public function testFindCollectionsByStructureGroup() {
 		$mapper = $this->factory->createWebCollectionMapper();
-		$mapper->setProperty(WebCollectionMapper :: LANGUAGE_FIELD, 'de_DE');
 
-		// Create the group instance.
-		$group = new StructureGroup();
-		$group->setId(2);
-
-		$collections = $mapper->findByGroup($group);
+		$collections = $mapper->findByGroupId(2, 'de_DE');
 
 		$this->assertNotNull($collections);
 		$this->assertTrue($collections instanceof ArrayObject);
+        /*
 		print "\n\n";
 		foreach ($collections as $coll) {
 			print $coll->getWebPage()->getName()."\n";
@@ -133,7 +113,7 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 			}
 		}
 		print "\n\n";
-
+        */
 		$this->assertEquals(5, $collections->count());
 	}
 
@@ -142,9 +122,8 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 	 */
 	public function testSaveANewRootCollectionAtTheEndOfTheLevel() {
 		$mapper = $this->factory->createWebCollectionMapper();
-		$mapper->setProperty(WebCollectionMapper :: LANGUAGE_FIELD, 'de_DE');
 
-		$collection = $mapper->findById(2);
+		$collection = $mapper->findById(2, 'de_DE');
 		$this->assertNotNull($collection);
 		$structGroup = $collection->getStructureGroup();
 
@@ -177,11 +156,11 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
 	 * Saves a new collection in Unternehmen, after Jobs
 	 */
 	public function testSaveANewChildCollectionAtTheEndOfTheLevel() {
+        
+        $mapper = $this->factory->createWebCollectionMapper();
 
-		$mapper = $this->factory->createWebCollectionMapper();
-		$mapper->setProperty(WebCollectionMapper :: LANGUAGE_FIELD, 'de_DE');
-
-		$collection = $mapper->findById(3);
+		$collection = $mapper->findById(3, 'de_DE');
+        
 		$structGroup = $collection->getStructureGroup();
 
 		$this->assertNotNull($structGroup);
@@ -222,9 +201,8 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
     public function testFindAWebCollectionGroupByItsAliasName() {
         
         $mapper = $this->factory->createWebCollectionMapper();
-        $mapper->setProperty(WebCollectionMapper :: LANGUAGE_FIELD, 'de_DE');
 
-        $collections = $mapper->findByGroupAlias('backend');
+        $collections = $mapper->findByGroupAlias('backend', 'de_DE');
         $this->assertNotNull($collections);
         $this->assertTrue($collections->count() > 0);
         
@@ -238,11 +216,49 @@ class WebCollectionMapperTestCase extends BasePersistenceTestCase {
      */
     public function testDoNotFindAWebCollectionByANotExistingAlias() {
         $mapper = $this->factory->createWebCollectionMapper();
-        $mapper->setProperty(WebCollectionMapper :: LANGUAGE_FIELD, 'de_DE');
 
-        $collections = $mapper->findByGroupAlias('not_existing_group');
+        $collections = $mapper->findByGroupAlias('not_existing_group', 'de_DE');
         
         $this->assertNull($collections);        
+    }
+    
+    /*
+     * This method tries to find the WebCollection for the alias path
+     * /project/nexd/umdoc and /project/nexd/umdoc/diagrams
+     */
+    public function testFindAWebCollectionByItsAliasPath() {
+        
+        $mapper = $this->factory->createWebCollectionMapper();
+        
+        
+        $aliasPath  = array('project', 'nexd', 'umldoc');
+        $collection = $mapper->findByAliasPath($aliasPath, 'de_DE');
+        $this->assertNotNull($collection);
+        $this->assertEquals('umldoc', $collection->getAlias());
+        
+        
+        $aliasPath  = array('project', 'nexd', 'umldoc', 'diagrams');
+        $collection = $mapper->findByAliasPath($aliasPath, 'de_DE');
+        $this->assertNotNull($collection);
+        $this->assertEquals('diagrams', $collection->getAlias());
+    }
+    
+    /*
+     * Tries to produce an exception with invalid arguments
+     */
+    public function testGetExceptionFromCallFindWebCollectionWithNullOrEmptyArray() {
+        
+        $mapper = $this->factory->createWebCollectionMapper();
+        try {
+            $mapper->findByAliasPath(null, 'de_DE');
+            $this->fail('Expected an InvalidArgumentException');
+        } catch (InvalidArgumentException $e) {}
+        
+        try {
+            $mapper->findByAliasPath(array(), 'de_DE');
+            $this->fail('Expected an InvalidArgumentException');
+        } catch (InvalidArgumentException $e) {}
+        
     }
 }
 ?>
