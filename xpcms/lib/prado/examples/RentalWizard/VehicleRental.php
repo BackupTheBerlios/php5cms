@@ -2,7 +2,7 @@
 /**
  * Calcuates a vehicle rental.
  * @author $Author: nexd $
- * @version $Id: VehicleRental.php,v 1.1 2005/12/05 17:24:42 nexd Exp $
+ * @version $Id: VehicleRental.php,v 1.2 2006/01/02 17:06:35 nexd Exp $
  * @package prado.examples
  */
 

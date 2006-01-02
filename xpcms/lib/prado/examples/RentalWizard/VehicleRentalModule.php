@@ -2,7 +2,7 @@
 /**
  * TWizard example's Module class
  * @author $Author: nexd $
- * @version $Id: VehicleRentalModule.php,v 1.1 2005/12/05 17:24:42 nexd Exp $
+ * @version $Id: VehicleRentalModule.php,v 1.2 2006/01/02 17:06:35 nexd Exp $
  * @package prado.examples
  */
 
@@ -91,10 +91,10 @@ class VehicleRentalModule extends TModule
 	 */
 	function calculateQuote($vehicle, $data)
 	{
-		$pickup = strtotime($data['PickUpDate']);		
+		$pickup = @strtotime($data['PickUpDate']);		
 		$pickup += ($data['PickUpTime']+1)*15*60;		
 
-		$return = strtotime($data['ReturnDate']);
+		$return = @strtotime($data['ReturnDate']);
 		$return += ($data['ReturnTime']+1)*15*60;
 		
 		$data['pickup'] = $pickup;

@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:41 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:06:35 $
  * @package System
  */
  
@@ -338,7 +338,7 @@ class TComponent
 				$this->root->registerPostBackCandidate($component);
 			if($component instanceof IValidator)
 				$this->root->registerValidator($component);
-			if(interface_exists('ICallbackEventHandler', FALSE))
+			if(function_exists("interface_exists") && interface_exists('ICallbackEventHandler', FALSE) || class_exists("ICallbackEventHandler"))
 			{
 				if($component instanceof ICallbackEventHandler)				
 					$this->root->registerCallbackCandidate($component);
@@ -863,7 +863,7 @@ class TComponent
 	private function allocateID($type)
 	{
 		$this->nextID++;
-		return '_'.$type.$this->nextID;
+		return 'C_'.$type.$this->nextID;
 	}
 
 	/**

@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo [at] gmail [dot] com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:41 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:06:35 $
  * @package System
  */
 
@@ -93,7 +93,7 @@ class TGlobalization
 		if(isset($config['defaultCulture']))
 			$this->defaultCulture = (string)$config['defaultCulture'];
 		
-		if($config->translation)
+		if($config->translation instanceof SimpleXMLElement)
 		{
 			if(isset($config->translation['type']))
 				$this->Translation['type'] = (string)$config->translation['type'];
@@ -105,10 +105,10 @@ class TGlobalization
 				$this->Translation['filename'] = 
 						$config->translation['filename'];
 			else
-				$this->Translation['filename'] = '';						
+				$this->Translation['filename'] = '';	
 		}
 		
-		if($config->cache)
+		if($config->cache instanceof SimpleXMLElement)
 		{
 			if(isset($config->cache['dir']))
 				$this->Cache = (string)$config->cache['dir'];

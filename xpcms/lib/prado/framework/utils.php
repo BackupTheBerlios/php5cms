@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:41 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:06:35 $
  * @package System
  */
 
@@ -247,13 +247,13 @@ function pradoParseDate($string, $format)
 		if ($year !=0 && $month !=0 && $day != 0) 
 		{		
 			//return only valid dates
-			return checkdate($month, $day, $year) ? mktime($hour, $min, 0, $month, $day, $year) : null;
+			return @checkdate($month, $day, $year) ? @mktime($hour, $min, 0, $month, $day, $year) : null;
 		}
 	   
 		if ($month !=0 && $day != 0) 
 		{
-			$year = date('Y');
-			return checkdate($month, $day, $year) ? mktime($hour, $min, 0, $month, $day, $year) : null;
+			$year = @date('Y');
+			return @checkdate($month, $day, $year) ? @mktime($hour, $min, 0, $month, $day, $year) : null;
 		}
 	   
 		return null;

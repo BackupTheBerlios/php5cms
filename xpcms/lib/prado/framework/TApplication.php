@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:41 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:06:35 $
  * @package System
  */
 
@@ -456,7 +456,7 @@ class TApplication
 		}
 
 		//globalization should be last, it may require Request, Session, Resource and User
-		if($this->specification->globalization->length)
+		if($this->specification->globalization instanceof SimpleXMLElement)
 			$this->globalization=new $globalizationClass($this->specification->globalization);		
 	}
 

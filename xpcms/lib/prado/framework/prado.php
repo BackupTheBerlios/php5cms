@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:41 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:06:35 $
  * @package System
  */
 
@@ -29,7 +29,7 @@ if(!defined('PRADO_EXT_CLASS')) define('PRADO_EXT_CLASS','.php');
 /**
  * set up error handler to catch user errors
  */
-set_error_handler("pradoErrorHandler");
+//set_error_handler("pradoErrorHandler");
 
 /**
  * utility functions file
