@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 
@@ -165,6 +165,22 @@ class TButton extends TWebControl implements IPostBackEventHandler
 	}
 
 	/**
+	 * @return string the group of validators which the button causes validation upon postback
+	 */
+	public function getValidationGroup()
+	{
+		return $this->getViewState('ValidationGroup','');
+	}
+
+	/**
+	 * @param string the group of validators which the button causes validation upon postback
+	 */
+	public function setValidationGroup($value)
+	{
+		$this->setViewState('ValidationGroup',$value,'');
+	}
+
+	/**
 	 * Raises postback event.
 	 * The implementation of this function should raise appropriate event(s) (e.g. OnClick, OnCommand)
 	 * indicating the component is responsible for the postback event.
@@ -234,7 +250,9 @@ class TButton extends TWebControl implements IPostBackEventHandler
 		$attributes['value']=$this->isEncodeText()?pradoEncodeData($this->getText()):$this->getText();
 		if($this->causesValidation() && $this->Page->isEndScriptRegistered('TValidator'))
 		{
-			$script = "Prado.Validation.AddTarget('{$this->ClientID}');";
+			$group = $this->getValidationGroup();
+			$group = strlen($group) ? ",'".$group."'" : '';
+			$script = "Prado.Validation.AddTarget('{$this->ClientID}' {$group});";
 			$this->Page->registerEndScript($this->ClientID.'target', $script);
 		}
 		return $attributes;

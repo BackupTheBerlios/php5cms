@@ -51,7 +51,7 @@
  * @author John Luxford <lux@simian.ca>
  * @copyright Copyright (C) 2004, Simian Systems Inc.
  * @license http://www.opensource.org/licenses/lgpl-license.php
- * @version 1.0, 2004-09-10, $Id: phpbeans.php,v 1.1 2005/12/05 17:24:52 nexd Exp $
+ * @version 1.0, 2004-09-10, $Id: phpbeans.php,v 1.2 2006/01/02 17:47:55 nexd Exp $
  * @access public
  */
 class PHP_Bean_Client {
@@ -414,7 +414,7 @@ class PHP_Bean_Client {
  * @author John Luxford <lux@simian.ca>
  * @copyright Copyright (C) 2004, Simian Systems Inc.
  * @license GPL
- * @version 1.0, 2004-09-10, $Id: phpbeans.php,v 1.1 2005/12/05 17:24:52 nexd Exp $
+ * @version 1.0, 2004-09-10, $Id: phpbeans.php,v 1.2 2006/01/02 17:47:55 nexd Exp $
  * @access public
  */
 class PHP_Bean_Error {

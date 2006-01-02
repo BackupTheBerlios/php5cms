@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 
@@ -43,7 +43,7 @@
  * - <b>OnSelectionChanged</b>, Occurs when a different item is selected in a data listing control between postbacks.
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $ $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $ $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 abstract class TBaseDataList extends TWebControl

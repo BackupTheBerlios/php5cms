@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:49 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.UI
  */
 
@@ -51,15 +51,15 @@ class TPage extends TControl
 	/**
 	 * hidden form field name for viewstate
 	 */
-	const INPUT_VIEWSTATE='__VIEWSTATE';
+	const INPUT_VIEWSTATE='PRADO_VIEWSTATE';
 	/**
 	 * hidden form field name for event target
 	 */
-	const INPUT_EVENTTARGET='__EVENTTARGET';
+	const INPUT_EVENTTARGET='PRADO_EVENTTARGET';
 	/**
 	 * hidden form field name for event parameter
 	 */
-	const INPUT_EVENTPARAMETER='__EVENTPARAMETER';
+	const INPUT_EVENTPARAMETER='PRADO_EVENTPARAMETER';
 	/**
 	 * name of javascript function that submits a form
 	 */
@@ -118,7 +118,7 @@ class TPage extends TControl
 	 * @var THead
 	 */
 	private $head;
-	
+
 	/**
 	 * list of all validators on this page
 	 * @var array
@@ -200,7 +200,7 @@ class TPage extends TControl
 	}
 
 	/**
-	 * Indicates whether all validators have successfully validated the post data.
+	 * Indicates whether all validators have successfully fd the post data.
 	 * The value is available since PostBack stage.
 	 * @return boolean
 	 */
@@ -211,7 +211,7 @@ class TPage extends TControl
 
 	/**
 	 * Attaches the form object to the page.
-	 * If the 
+	 * If the
 	 * @param TForm an instance of TForm or its desendent class
 	 */
 	public function setForm(TForm $form)
@@ -222,7 +222,7 @@ class TPage extends TControl
 		$this->forms[$form->getUniqueID()] = $form;
 
 		// The last form set must ALWAYS be the getForm form, as there could
-		// be instances where controls set something (eg registerBeginScript) 
+		// be instances where controls set something (eg registerBeginScript)
 		// in the Page->Form variable, but if this doesn't refer to the last form
 		// in the page it's possible that the Page->Form could be rendered before
 		// the beginScripts are added to the Form, and won't show on the page.
@@ -237,7 +237,7 @@ class TPage extends TControl
 	{
 		if (isset($this->forms[$form->getUniqueID()]))
 			unset($this->forms[$form->getUniqueID()]);
-			
+
 		if(!is_null($this->form) && $form->getUniqueID()==$this->form->getUniqueID())
 			$this->form=null;
 	}
@@ -256,13 +256,13 @@ class TPage extends TControl
 						return null;
 				return $this->masterPage->getForm($id);
 			}
-			
-			return $this->forms[$id];	
+
+			return $this->forms[$id];
 		}
-		
+
 		return is_null($this->form)&&!is_null($this->masterPage)?$this->masterPage->getForm():$this->form;
 	}
-	
+
 	/**
 	 * Returns the current page's Head object.
 	 * @return THead	The reference to the THead object
@@ -271,19 +271,19 @@ class TPage extends TControl
 	{
 		return is_null($this->head)&&!is_null($this->masterPage)?$this->masterPage->getHead():$this->head;
 	}
-	
+
 	/**
 	 * sets the current page's Head object.
 	 * @param		THead		$head		The head object
-	 * @return 		void 
+	 * @return 		void
 	 */
 	public function setHead(THead $head)
 	{
-		if(!is_null($this->head))  
+		if(!is_null($this->head))
 			throw new Exception('A page can only contain one THead control');
 		$this->head=$head;
 	}
-	
+
 	/**
 	 * @return string the name of the theme to be applied to the page
 	 */
@@ -379,7 +379,7 @@ class TPage extends TControl
 			$id=$vsm->saveViewState($data);
 			$this->registerViewState($id);
 		}
-		else 
+		else
 		{
 			$this->registerViewState($data);
 		}
@@ -462,7 +462,7 @@ class TPage extends TControl
 	{
 		if(isset($this->postDataLoaders[$control->getUniqueID()]))
 			unset($this->postDataLoaders[$control->getUniqueID()]);
-	}	
+	}
 
 	/**
 	 * Registers a postback event handler.
@@ -535,12 +535,23 @@ class TPage extends TControl
 	 * and update {@link isValid} accordingly.
 	 * @see isValid()
 	 */
-	public function validate()
+	public function validate($validationGroup=null)
 	{
 		$result=true;
-		foreach($this->validators as $validator)
-			if($validator->isVisible(true))
-				$result=$validator->validate()&&$result;
+		if(is_null($validationGroup))
+		{
+			foreach($this->validators as $validator)
+				if($validator->isVisible(true))
+					$result=$validator->validate()&&$result;
+		}
+		else
+		{
+			foreach($this->validators as $validator)
+				if($validator->isVisible(true)
+					&& $validator->getValidationGroup() == $validationGroup)
+					$result=$validator->validate()&&$result;
+		}
+		TValidationSummary::setCurrentGroup($validationGroup);
 		$this->isValid=$result;
 	}
 
@@ -569,8 +580,8 @@ class TPage extends TControl
 function $postBack(eventTarget, eventParameter) {
 	var validation = typeof(Prado) != 'undefined' && typeof(Prado.Validation) != 'undefined';
 	var theform = document.getElementById ? document.getElementById(\"$formName\") : document.forms[\"$formName\"];
-	theform.__EVENTTARGET.value = eventTarget.split(\"$\").join(\":\");
-	theform.__EVENTPARAMETER.value = eventParameter;
+	theform.".self::INPUT_EVENTTARGET.".value = eventTarget.split(\"$\").join(\":\");
+	theform.".self::INPUT_EVENTPARAMETER.".value = eventParameter;
 	if(!validation || Prado.Validation.OnSubmit(theform))
 	{
 	   theform.submit();
@@ -582,7 +593,7 @@ function $postBack(eventTarget, eventParameter) {
 		$this->registerHiddenField(self::INPUT_EVENTPARAMETER,'');
 		return $event;
 	}
-	
+
 	/**
 	 * Registers the viewstate into each form so that regardless of which
 	 * form triggers the postback, viewstate is found for the whole page
@@ -592,7 +603,7 @@ function $postBack(eventTarget, eventParameter) {
 	{
 		if(!is_null($this->masterPage))
 			$this->masterPage->registerViewState($value);
-			
+
 		foreach ($this->forms as $form) {
 			$form->registerHiddenField(self::INPUT_VIEWSTATE, $value);
 		}
@@ -739,16 +750,16 @@ function $postBack(eventTarget, eventParameter) {
 	/**
 	 * Indicates whether the named scriptfile has been registered before.
 	 * @param string the name of the scriptfile
-	 * @return boolean 
+	 * @return boolean
 	 * @see registerScriptFile()
 	 */
 	public function isScriptFileRegistered($key)
 	{
 		// First off check if we have a head control
 		$head = $this->getHead();
-		if (!is_null($head)) 
+		if (!is_null($head))
 			return $head->isScriptFileRegistered($key);
-			
+
 		$form=$this->getForm();
 		if(is_null($form))
 			throw new Exception('A server form control is required.');
@@ -769,7 +780,7 @@ function $postBack(eventTarget, eventParameter) {
 			$head->registerScriptFile($key, $scriptFile);
 			return;
 		}
-		
+
 		$form=$this->getForm();
 		if(is_null($form))
 			throw new Exception('A server form control is required.');
@@ -779,16 +790,16 @@ function $postBack(eventTarget, eventParameter) {
 	/**
 	 * Indicates whether the named CSS style file has been registered before.
 	 * @param string the name of the style file
-	 * @return boolean 
+	 * @return boolean
 	 * @see registerStyleFile()
 	 */
 	public function isStyleFileRegistered($key)
 	{
 		// First off check if we have a head control
 		$head = $this->getHead();
-		if (!is_null($head)) 
+		if (!is_null($head))
 			return $head->isStyleFileRegistered($key);
-		
+
 		$form=$this->getForm();
 		if(is_null($form))
 			throw new Exception('A server form control is required.');
@@ -809,7 +820,7 @@ function $postBack(eventTarget, eventParameter) {
 			$head->registerStyleFile($key, $styleFile);
 			return;
 		}
-		
+
 		$form=$this->getForm();
 		if(is_null($form))
 			throw new Exception('A server form control is required.');
@@ -890,7 +901,7 @@ function $postBack(eventTarget, eventParameter) {
 	 */
 	public function getPageName()
 	{
-		return is_null($this->module)?$this->getID():$this->module->getID().':'.$this->getID(); 
+		return is_null($this->module)?$this->getID():$this->module->getID().':'.$this->getID();
 	}
 
 	/**
@@ -959,21 +970,21 @@ function $postBack(eventTarget, eventParameter) {
 
 		$state=$this->saveViewState();
 		$this->savePageStateToPersistenceMedium($state);
-		
+
 		//find the globalization class, and sender the proper headers
 		$globalizer = $this->Application->getGlobalization();
 		if($globalizer) $globalizer->sendContentTypeHeader();
-		
+
 		$this->renderContent();
 		$this->onUnloadRecursive(new TEventParameter);
 
 		//try to save untranslated messages
-		if($globalizer) 
+		if($globalizer)
 		{
 			if(class_exists('Translation', FALSE))
 			{
 				try { Translation::saveMessages(); }
-				catch (exception $e) { } 
+				catch (exception $e) { }
 			}
 		}
 	}
@@ -1000,7 +1011,12 @@ function $postBack(eventTarget, eventParameter) {
 		else
 		{
 			if($sender->hasProperty('CausesValidation') && $sender->CausesValidation)
-				$this->validate();
+			{
+				if($sender->hasProperty('ValidationGroup'))
+					$this->validate($sender->ValidationGroup);
+				else
+					$this->validate();
+			}
 			if($sender instanceof IPostBackEventHandler)
 				$sender->raisePostBackEvent($this->getPostBackParameter());
 		}
@@ -1021,7 +1037,7 @@ function $postBack(eventTarget, eventParameter) {
 			echo $this->masterPage->renderContent();
 		}
 	}
-	
+
 	/**
 	 * Renders the body content.
 	 * This is overridden so that the THead control can be caught
@@ -1120,7 +1136,7 @@ function $postBack(eventTarget, eventParameter) {
 		}
 		return $viewState;
 	}
-	
+
 	public function registerClientScript($scripts)
 	{
 		TClientScript::register($this, $scripts);

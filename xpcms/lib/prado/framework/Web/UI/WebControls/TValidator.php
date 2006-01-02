@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 
@@ -56,7 +56,7 @@
  * in the postback event handler, such as <b>OnClick</b> or <b>OnCommand</b>,
  * instead of <b>OnLoad</b> event.
  *
- * Note, to use validators derived from this component, you have to 
+ * Note, to use validators derived from this component, you have to
  * copy the file "<framework>/js/prado_validator.js" to the "js" directory
  * which should be under the directory containing the entry script file.
  *
@@ -217,16 +217,16 @@ abstract class TValidator extends TWebControl implements IValidator
 	{
 		$this->setViewState('ControlToValidate',$value,'');
 	}
-	
+
 	/**
 	 * Get the anchor href link for the error messages.
-	 * @return string anchor string ID 
+	 * @return string anchor string ID
 	 */
 	public function getAnchor()
 	{
 		return $this->getViewState('Anchor', '');
 	}
-	
+
 	/**
 	 * Set the anchor ID for the error message link. If the value
 	 * is "true" then the ID of the ControlToValidate will be used
@@ -237,7 +237,7 @@ abstract class TValidator extends TWebControl implements IValidator
 	{
 		$this->setViewState('Anchor', $value, '');
 	}
-	
+
 	/**
 	 * Get the CssClass for the ControlToValidate when the validation
 	 * failes. The CSS is appended to the control.
@@ -247,15 +247,31 @@ abstract class TValidator extends TWebControl implements IValidator
 	{
 		return $this->getViewState('ControlCssClass', '');
 	}
-	
+
 	/**
-	 * Set the CssClass for the ControlToValidate component when the 
+	 * Set the CssClass for the ControlToValidate component when the
 	 * validation fails.
 	 * @param string the CSS class name.
 	 */
 	public function setControlCssClass($value)
 	{
 		$this->setViewState('ControlCssClass', $value, '');
+	}
+
+	/**
+	 * @return string the group which this validator belongs to
+	 */
+	public function getValidationGroup()
+	{
+		return $this->getViewState('ValidationGroup','');
+	}
+
+	/**
+	 * @param string the group which this validator belongs to
+	 */
+	public function setValidationGroup($value)
+	{
+		$this->setViewState('ValidationGroup',$value,'');
 	}
 
 	/**
@@ -332,30 +348,28 @@ abstract class TValidator extends TWebControl implements IValidator
 		$page=$this->getPage();
 		if($this->isClientScriptEnabled() && !$page->isScriptFileRegistered('validator'))
 		{
-			$dependencies = array('base', 'dom', 'validator');
+			$page->registerClientScript('validator');
 			$path = $this->Application->getResourceLocator()->getJsPath().'/';
-			foreach($dependencies as $file)
-				$page->registerScriptFile($file,$path.$file.'.js');
 
 			$script="
 			if(typeof(Prado) == 'undefined')
 				alert(\"Unable to find Prado javascript library '{$path}base.js'.\");
-			else if(Prado.Version != 2.0) 
+			else if(Prado.Version != 2.0)
 				alert(\"Prado javascript library version 2.0 required.\");
 			else if(typeof(Prado.Validation) == 'undefined')
-				alert(\"Unable to find validation javascript library '{$path}validator.js'.\");				
+				alert(\"Unable to find validation javascript library '{$path}validator.js'.\");
 			else
-				Prado.Validation.AddForm('{$page->Form->ClientID}');				
+				Prado.Validation.AddForm('{$page->Form->ClientID}');
 			";
 			$page->registerEndScript('TValidator',$script);
 		}
-	
+
 		//update the Css class for the controls
 		$idPath=$this->getControlToValidate();
 		if(strlen($idPath))
 			$this->updateControlCssClass($this->getTargetControl($idPath));
 	}
-	
+
 	/**
 	 * Update the ControlToValidate component's css class depending
 	 * if the ControlCssClass property is set, and whether this is valid.
@@ -366,18 +380,18 @@ abstract class TValidator extends TWebControl implements IValidator
 	{
 		//do the CssClass change to the control
 		$CssClass = $this->getControlCssClass();
-		
+
 		if(strlen($CssClass) <= 0) return false;
-		
+
 		if(!($control instanceof TWebControl)) return false;
-		
+
 		$class = preg_replace ('/ '.preg_quote($CssClass).'/', '',$control->getCssClass());
-		
+
 		if(!$this->isValid())
 			$class .= ' '.$CssClass;
 
 		$control->setCssClass($class);
-		
+
 		return true;
 	}
 
@@ -399,16 +413,16 @@ abstract class TValidator extends TWebControl implements IValidator
 		{
 			$idPath=$this->getControlToValidate();
 			$anchor = $this->getTargetControl($idPath)->getClientID();
-		}		
-	
-		$js = "onclick=\"javascript: return Prado.Validation.Util.focus('{$anchor}');\"";
+		}
+
+		$js = "onclick=\"javascript:return Prado.Validation.Util.focus('{$anchor}');\"";
 
 		if(!empty($anchor))
 			return "<a href=\"#{$anchor}\" {$js} >{$message}</a>";
 		else
-			return $message;		
+			return $message;
 	}
-	
+
 	/**
 	 * Render the client-side javascript code.
 	 * @param string a list of options for the client-side validator
@@ -418,70 +432,40 @@ abstract class TValidator extends TWebControl implements IValidator
 		if(!$this->isEnabled() || !$this->isClientScriptEnabled())
 			return;
 		$class = get_class($this); //validator name
-		$option = $this->renderJsOptions($options);
+		$option = TJavascript::toList($options);
 		$script = "new Prado.Validation(Prado.Validation.{$class}, {$option});";
 		$this->Page->registerEndScript($options['id'].'jsValidator', $script);
 	}
 
 	/**
-	 * Render the array as javascript list.
-	 * @param array list of options.
-	 * @return string array as javascript list. 
-	 */
-	protected function renderJsOptions($options)
-	{
-		$keyPair = array();
-		foreach($options as $key => $value)
-			$keyPair[] = $key.':"'.$this->escapeJS($value).'"';
-		return '{'.implode(', ', $keyPair).'}';		
-	}
-
-	/**
-	 * Escape javascript strings.
-	 */
-	protected function escapeJS($string)
-	{
-		return str_replace(array("\n","\r"),array('\n',''),addslashes($string));
-	}
-
-	/**
 	 * Get a list of options for the client-side javascript validator
-	 * @return array list of options for the validator 
+	 * @return array list of options for the validator
 	 */
 	protected function getJsOptions()
 	{
 		$options['id'] = $this->ClientID;
 		$idPath=$this->getControlToValidate();
-		if(strlen($idPath))
-			$options['controltovalidate']=$this->getTargetControl($idPath)->getClientID();
-
-		$msg = $this->getErrorMessage();					
-		if(strlen($msg))
-			$options['errormessage']=$msg;
-
+		$options['controltovalidate']=$this->getTargetControl($idPath)->getClientID();
+		$options['errormessage']=$this->getMessage();
 		$display=$this->getDisplay();
-		if($display!='Static')
-			$options['display']=$display;
-		if(!$this->isValid())
-			$options['isvalid']='False';
-		if(!$this->isEnabled())
-			$options['enabled']='False';
-		$CssClass = $this->getControlCssClass();
-		if(strlen($CssClass))
-			$options['controlcssclass'] = $CssClass;
+		if($display!='Static') $options['display']=$display;
+		if(!$this->isValid()) $options['isvalid']='False';
+		if(!$this->isEnabled()) $options['enabled']='False';
+		$options['controlcssclass'] = $this->getControlCssClass();
+		$options['validationgroup'] =  $this->getValidationGroup();
 		return $options;
 	}
 
 	/**
 	 * Get the validation error message.
-	 * @return string error message 
+	 * @return string error message
 	 */
 	protected function getMessage()
 	{
 		$text = $this->getText();
 		$text = $this->isEncodeText()?pradoEncodeData($text):$text;
 		$msg = $this->getErrorMessage();
-		$msg = $this->getAnchoredMessage($this->isEncodeText()?pradoEncodeData($msg):$msg);		
+		$msg = $this->getAnchoredMessage($this->isEncodeText()?pradoEncodeData($msg):$msg);
 
 		if(strlen($text))
 			return $text;
@@ -510,7 +494,7 @@ abstract class TValidator extends TWebControl implements IValidator
 			$style['visibility']='hidden';
 
 		$this->setStyle($style);
-		
+
 		//render the javascripts
 		$this->renderJsValidator($this->getJsOptions());
 

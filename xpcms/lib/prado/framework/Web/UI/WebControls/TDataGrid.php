@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 
@@ -211,7 +211,7 @@ require_once(dirname(__FILE__).'/TLinkButton.php');
  * - <b>OnItemCreatedCommand</b>, raised right after an item is created.
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $ $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $ $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 class TDataGrid extends TBaseDataList

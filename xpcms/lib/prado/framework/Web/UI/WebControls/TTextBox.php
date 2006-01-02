@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 
@@ -338,6 +338,8 @@ class TTextBox extends TWebControl implements IPostBackDataHandler
 				$attributes['rows']=$rows;	
 			if(($cols=$this->getColumns())>0)
 				$attributes['cols']=$cols;
+			else 
+				$attributes['cols']=40;
 			if(!$this->isWrap())
 				$attributes['wrap']='off';
 		}

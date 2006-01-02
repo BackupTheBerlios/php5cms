@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 
@@ -175,7 +175,7 @@ class TImage extends TWebControl
 	{
 		$attributes=parent::getAttributesToRender();
 		$attributes['src']=$this->getImageUrl();
-		$attributes['border']=$this->getBorder();
+		//$attributes['border']=$this->getBorder();
 		$attributes['alt']=$this->isEncodeText()?pradoEncodeData($this->getAlternateText()):$this->getAlternateText();
 		$align=$this->getImageAlign();
 		if(strlen($align))

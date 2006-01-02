@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:49 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI
  */
 
@@ -32,7 +32,7 @@
  * Namespace: System.Web.UI
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:49 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI
  */
 class TJavascript
@@ -50,6 +50,18 @@ class TJavascript
 </script>
 EOD;
 		return $contents;
+	}
+
+	/**
+	 * Converts PHP types into javascript types.
+	 * @param mixed PHP value.
+	 * @return string javascript representation of the value.
+	 */
+	public static function convert($mixed)
+	{
+		$converter = new TJavascript();
+		$type = 'to_'.gettype($mixed);
+		return $converter->{$type}($mixed);
 	}
 	
 	/**
@@ -127,7 +139,8 @@ EOD;
 	/**
 	 * If string begins with [ and ends ], or begins with { and ends }
 	 * it is assumed to be javascript arrays or objects and no further
-	 * conversion is applied.
+	 * conversion is applied. Addslashes are applied, and new lines are 
+	 * converted to \n
 	 */
 	public function to_string($v)
 	{
@@ -138,7 +151,7 @@ EOD;
 				($first == '{' && $last == '}'))
 				return $v;
 		}
-		return "'".addslashes($v)."'";
+		return "'".preg_replace("/\n|\r\n/", '\n', addslashes($v))."'";
 	}
 	
 	public function to_array($v)

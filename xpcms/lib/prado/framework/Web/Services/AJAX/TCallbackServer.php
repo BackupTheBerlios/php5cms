@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:50 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.Services.AJAX
  */
 
@@ -29,35 +29,35 @@ require_once(dirname(__FILE__).'/TRemoteObjectServer.php');
  * de-marshalled (unserialized).
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:50 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.Services.AJAX
  */
-class TCallbackServer extends TRemoteObjectServer 
+class TCallbackServer extends TRemoteObjectServer
 {
 	/**
 	 * Service namespace.
 	 * @var string
 	 */
 	protected $NS = "__CALLBACK";
-	
+
 	/**
 	 * List of inputs that are posted during an AJAX request.
 	 * @var TCollection
 	 */
 	protected $posts;
-	
+
 	/**
 	 * Callback response.
 	 * @var TAjaxResponse
 	 */
 	protected $response;
-	
+
 	/**
 	 * Callback request
 	 * @var TCallbackRequest
 	 */
 	protected $request;
-	
+
 	/**
 	 * Create a new callback server.
 	 * @param string server URI.
@@ -66,10 +66,10 @@ class TCallbackServer extends TRemoteObjectServer
 	{
 		parent::__construct($uri);
 		$this->posts = new TCollection();
-		$this->posts->add(TPage::INPUT_VIEWSTATE);		
+		$this->posts->add(TPage::INPUT_VIEWSTATE);
 		$this->response = new TCallbackResponse();
 	}
-	
+
 	/**
 	 * Returns the callback response.
 	 * @return TCallbackResponse
@@ -78,7 +78,7 @@ class TCallbackServer extends TRemoteObjectServer
 	{
 		return $this->response;
 	}
-	
+
 	/**
 	 * Returns the callback request.
 	 * @return TAjaxRequest request info
@@ -87,7 +87,7 @@ class TCallbackServer extends TRemoteObjectServer
 	{
 		return $this->request;
 	}
-	
+
 	/**
 	 * Initialize the callback server. Create a new callback request.
 	 */
@@ -96,7 +96,7 @@ class TCallbackServer extends TRemoteObjectServer
 		$uri = $this->uri->getRequestUri();
 		$this->request = new TCallbackRequest($uri, $this->objects, $this->posts);
 	}
-	
+
 	/**
 	 * Returns the form input IDs that are returned for each callback request.
 	 * @return TCollection input IDs returned on callback.
@@ -105,7 +105,7 @@ class TCallbackServer extends TRemoteObjectServer
 	{
 		return $this->posts;
 	}
-	
+
 	/**
 	 * Get the callback stub generator.
 	 * @return TCallbackStub
@@ -114,18 +114,35 @@ class TCallbackServer extends TRemoteObjectServer
 	{
 		return new TCallbackStub($this->uri->getServerUri(), $this->posts);
 	}
-	
+
 	/**
 	 * Call the proxy method.
-	 * Data returned from the proxy method is saved into 
-	 * TCallback::$data.
+	 * Data returned from the proxy method is saved into TCallback::$data.
 	 */
 	protected function serve()
 	{
 		$data = $this->request->resolve()->invoke();
 		if(!is_null($data)) $this->response->data = $data;
 	}
-	
+
+	/**
+	 * Overrides parent implementation, displays nothing.
+	 */
+	protected function displayClient()
+	{
+
+	}
+
+	/**
+	 * Returns the javascript code of a list of post back IDs.
+	 */
+	public function renderClientScript()
+	{
+		$client = new TCallbackStubClient(
+						$this->getStubGenerator(), $this->objects);
+		return $client->render();
+	}
+
 	/**
 	 * Return the callback request by flushing the response.
 	 */
@@ -135,7 +152,7 @@ class TCallbackServer extends TRemoteObjectServer
 			$this->response->data, $this->response->output);
 		$response->render();
 	}
-	
+
 	/**
 	 * Returns true if the callback request.
 	 * @return boolean true if callback request, false otherwise.
@@ -153,23 +170,41 @@ class TCallbackServer extends TRemoteObjectServer
 }
 
 /**
+ * Renders the callback request IDs.
+ *
+ * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
+ * @package System.Web.Services.AJAX
+ */
+class TCallbackStubClient extends TAjaxStubClient
+{
+	/**
+	 * Returns the client-side code of a list of IDs that the post data collects.
+	 */
+	public function render()
+	{
+		return $this->renderScripts($this->objects);
+	}
+}
+
+/**
  * Callback client stubs.
  *
  * Generate the callback server url and a list of form inputs required
  * on a callback request.
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:50 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.Services.AJAX
  */
-class TCallbackStub extends TAjaxStub  
+class TCallbackStub extends TAjaxStub
 {
 	/**
 	 * List of form input IDs.
 	 * @var array
 	 */
 	protected $callback_inputs = array();
-		
+
 	/**
 	 * Create a new callback client stub.
 	 * @param string server url
@@ -180,7 +215,7 @@ class TCallbackStub extends TAjaxStub
 		parent::__construct($url);
 		$this->callback_inputs = $callback_inputs;
 	}
-	
+
 	/**
 	 * Generate the stub code.
 	 * @return string callback client stub code.
@@ -203,17 +238,17 @@ EOD;
  * Unserialize the post data.
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:50 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.Services.AJAX
  */
-class TCallbackRequest extends TAJAXRequest 
+class TCallbackRequest extends TAJAXRequest
 {
 	/**
 	 * List of post back control input IDs.
-	 * @var TCollection	
+	 * @var TCollection
 	 */
 	protected $posts;
-	
+
 	/**
 	 * Create a new callback request. Use loadCallbackPostData to load data.
 	 */
@@ -222,10 +257,10 @@ class TCallbackRequest extends TAJAXRequest
 		parent::__construct($uri, $objects);
 		$this->posts = $posts;
 	}
-	
+
 	/**
 	 * Gets the control ID that will handle the callback request.
-	 * @return string control ID.
+	 * @return string control ID path (dot notation).
 	 */
 	public function getRequestID()
 	{
@@ -233,7 +268,7 @@ class TCallbackRequest extends TAJAXRequest
 		{
 			$id = trim($_POST['__ID'],'"');
 			if(preg_match('/[0-9a-zA-Z_:]+/', $id))
-				return $id;
+				return str_replace(':', '.', $id);
 		}
 	}
 
@@ -250,9 +285,9 @@ class TCallbackRequest extends TAJAXRequest
 			$json = new TJSON();
 			return $json->decode($_POST['__data']);
 		}
-		return array();		
+		return array();
 	}
-	
+
 	/**
 	 * Load the allowable callback post data into $_REQUEST array.
 	 */
@@ -273,7 +308,7 @@ class TCallbackRequest extends TAJAXRequest
  * Callback response output and response JSON data.
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:50 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.Services.AJAX
  */
 class TCallbackResponse
@@ -283,12 +318,12 @@ class TCallbackResponse
 	 * @var string
 	 */
 	public $output;
-	
+
 	/**
 	 * Response data, will be marshalled into JSON format when rendered.
 	 * @var mixed
 	 */
-	public $data;	
+	public $data;
 }
 
 ?>

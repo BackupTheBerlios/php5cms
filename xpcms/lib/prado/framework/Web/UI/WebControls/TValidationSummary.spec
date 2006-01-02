@@ -8,4 +8,5 @@
 	<property name="ShowSummary" get="isShowSummary" set="setShowSummary" type="boolean" default="true" />
 	<property name="Group" get="getGroup" set="setGroup" type="string" />
 	<property name="AutoUpdate" get="isAutoUpdate" set="setAutoUpdate" type="boolean" default="true" />
+	<property name="ValidationGroup" get="getValidationGroup" set="setValidationGroup" type="string" />
 </component>

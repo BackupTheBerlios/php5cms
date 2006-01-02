@@ -10,4 +10,5 @@
 	<property name="EncodeText" get="isEncodeText" set="setEncodeText" type="boolean" default="true" />
 	<property name="Anchor" get="getAnchor" set="setAnchor" type="string" default="false" />
 	<property name="ControlCssClass" get="getControlCssClass" set="setControlCssClass" type="string" />
+	<property name="ValidationGroup" get="getValidationGroup" set="setValidationGroup" type="string" />
 </component>

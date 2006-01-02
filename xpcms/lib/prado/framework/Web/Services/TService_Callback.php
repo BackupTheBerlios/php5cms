@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:42 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.Services
  */
 
@@ -27,17 +27,17 @@ require_once(dirname(__FILE__).'/AJAX/TCallbackServer.php');
  * Encapsulates the callback server as a service.
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:42 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.Services
  */
 class TService_Callback extends TService
-{		
+{
 	/**
 	 * Callback server
 	 * @var TCallbackServer
 	 */
 	protected $server;
-	
+
 	/**
 	 * Callback requests are to be executed within a page.
 	 * @return boolean always false.
@@ -45,8 +45,8 @@ class TService_Callback extends TService
 	function IsRequestServiceable($request)
 	{
 		return false;
-	}	
-	
+	}
+
 	/**
 	 * Create a new Callack server.
 	 */
@@ -54,7 +54,7 @@ class TService_Callback extends TService
 	{
 		$this->server = new TCallbackServer();
 	}
-	
+
 	/**
 	 * Returns the current Callback server.
 	 * @return TCallbackServer
@@ -63,15 +63,15 @@ class TService_Callback extends TService
 	{
 		return $this->server;
 	}
-	
+
 	/**
 	 * Handle the callback request.
 	 */
 	function execute()
 	{
 		$this->server->handleRequest();
-	}	
-	
+	}
+
 	/**
 	 * Register callback objects.
 	 * @param string|object the page that handles the callback request
@@ -80,7 +80,7 @@ class TService_Callback extends TService
 	{
 		$this->server->register($object);
 	}
-	
+
 	/**
 	 * Returns true if a valid callback request
 	 * @return boolean true if valid callback, false otherwise
@@ -89,7 +89,7 @@ class TService_Callback extends TService
 	{
 		return $this->server->isCallbackRequest();
 	}
-	
+
 	/**
 	 * Returns true if a AJAX request, including javascript code requests.
 	 * @return boolean true if AJAX request.
@@ -98,7 +98,7 @@ class TService_Callback extends TService
 	{
 		return $this->server->getUri()->isServerRequest();
 	}
-	
+
 	/**
 	 * Gets the control ID that handles the callback event.
 	 * @return string callback handler control ID.
@@ -107,7 +107,7 @@ class TService_Callback extends TService
 	{
 		return $this->server->getRequest()->getRequestID();
 	}
-	
+
 	/**
 	 * Loads callback post data into $_REQUEST.
 
@@ -116,9 +116,9 @@ class TService_Callback extends TService
 	{
 		$this->server->getRequest()->loadCallBackPostData();
 	}
-	
+
 	/**
-	 * Gets the client javascript source URL.	 
+	 * Gets the client javascript source URL.
 	 * @return string client-side javascript source URL
 	 */
 	public function getClientUri()

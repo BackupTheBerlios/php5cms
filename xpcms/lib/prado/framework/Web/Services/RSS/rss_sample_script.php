@@ -12,7 +12,7 @@
 //| Authors: Michael Wimmer <flaimo@gmx.net>                             |
 //+----------------------------------------------------------------------+
 //
-// $Id: rss_sample_script.php,v 1.1 2005/12/05 17:24:43 nexd Exp $
+// $Id: rss_sample_script.php,v 1.2 2006/01/02 17:47:54 nexd Exp $
 
 /**
 * @package RSSBuilder

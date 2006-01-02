@@ -5,14 +5,14 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the BSD License.
  *
- * Copyright(c) 2004 by Xiang Wei Zhuo. 
+ * Copyright(c) 2004 by Xiang Wei Zhuo.
  *
  * To contact the author write to {@link mailto: weizhuoe[at]gmail[dot]com Wei Zhuo}
  * The latest version of PRADO can be obtained from:
  * {@link http://prado.sourceforge.net/}
  *
  * @author Xiang Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 
@@ -73,10 +73,10 @@
  *    Event="Button1:OnClick"
  *
  * @author Xiang Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
-class TValidatorGroup extends TValidator
+class TValidatorGroup extends TWebControl
 {
 	/**
 	 * A list of validator IDs belonging to this validator group.
@@ -102,19 +102,36 @@ class TValidatorGroup extends TValidator
 
 	/**
 	 * Validator group active state.
-	 * @var boolean 
+	 * @var boolean
 	 */
 	private $active = false;
 
 	/**
 	 * If any group is active, then group validation is true.
-	 * @var boolean 
+	 * @var boolean
 	 */
 	private static $groupValidation = false;
 
 	/**
+	 * @return boolean whether client-side validation is enabled.
+	 */
+	public function isClientScriptEnabled()
+	{
+		return $this->getViewState('EnableClientScript',true);
+	}
+
+	/**
+	 * Sets the value indicating whether client-side validation is enabled.
+	 * @param boolean whether client-side validation is enabled.
+	 */
+	public function enableClientScript($value)
+	{
+		$this->setViewState('EnableClientScript',$value,true);
+	}
+
+	/**
 	 * Is the group currently active.
-	 * @return boolean true if group is active, false otherwise. 
+	 * @return boolean true if group is active, false otherwise.
 	 */
 	public function isActive()
 	{
@@ -139,7 +156,7 @@ class TValidatorGroup extends TValidator
 	}
 
 	/**
-	 * Sets the members for this validator group. 
+	 * Sets the members for this validator group.
 	 * The <b>Member</b> attribute is a string in the form of
 	 * validator IDs separated by commas. E.g. if there are
 	 * validators with IDs "VPCheck1" and "VPCheck2", then
@@ -179,7 +196,7 @@ class TValidatorGroup extends TValidator
 	}
 
 	/**
-	 * Group validation event. 
+	 * Group validation event.
 	 * This event is activated on the OnLoad event of the TValidatorGroup
      * component. The validation is processed as follows.
 	 *	# Get all the validators on the page.
@@ -201,7 +218,7 @@ class TValidatorGroup extends TValidator
 		$validatorIDs = array_keys($validators);
 
 		$thisGroupIDs = array();
-		
+
 		foreach($this->members as $member)
 		{
 			$control = $parent->findObject($member);
@@ -210,7 +227,7 @@ class TValidatorGroup extends TValidator
 		}
 
 		$this->saveValidatorStates();
-		
+
 		foreach($validatorIDs as $ID)
 		{
 			if(in_array($ID,$thisGroupIDs) == false)
@@ -222,7 +239,7 @@ class TValidatorGroup extends TValidator
 	 * Save all the validator disabled/enabled states on this page.
 	 */
 	protected function saveValidatorStates()
-	{	
+	{
 		$validators = $this->getPage()->getValidators();
 
 		$validatorIDs = array_keys($validators);
@@ -240,7 +257,7 @@ class TValidatorGroup extends TValidator
 	{
 		if(count($this->validatorStates) <= 0)
 			return;
-	
+
 		$validators = $this->getPage()->getValidators();
 
 		$validatorIDs = array_keys($validators);
@@ -258,7 +275,7 @@ class TValidatorGroup extends TValidator
 	 * @param TEventParameter event parameter to be passed to the event
      * handlers
 	 */
-	public function onPreRender($param) 
+	public function onPreRender($param)
 	{
 		$this->loadValidatorStates();
 
@@ -296,7 +313,7 @@ class TValidatorGroup extends TValidator
 	 * Get a list of controls to validate for this group.
      * @return array of control client IDs, each encapsulated with quotes.
 	 */
-	private function getMembersList() 
+	private function getMembersList()
 	{
 		$memberIDs = array();
 		$parent = $this->getParent();
@@ -316,54 +333,44 @@ class TValidatorGroup extends TValidator
 	 */
 	public function render()
 	{
-		$this->renderJsValidator($this->getJsOptions());
-	}
-
-	/**
-	 * Render the javascript for the client side group validation.
-	 * @param array list of options for the group validator.
-	 */
-	protected function renderJsValidator($options)
-	{
 		if(!$this->isEnabled() || !$this->isClientScriptEnabled())
 			return;
-		$class = get_class($this);
-		$option = $this->renderJsOptions($options);
-		$validators = $this->renderJsMembers();
+		$option = TJavascript::toList($this->getJsOptions());
+		$validators = TJavascript::toArray($this->getGroupMembers());
 		$script = "Prado.Validation.AddGroup({$option}, $validators);";
-		$this->Page->registerEndScript($options['id'].'jsValidator', $script);
+		$this->Page->registerEndScript($this->ClientID, $script);
 	}
 
 	/**
 	 * Get a list of options for the client side javascript group validation.
-	 * @return array list of options. 
+	 * @return array list of options.
 	 */
 	protected function getJsOptions()
 	{
-		$options = parent::getJsOptions();
+		$options['id'] = $this->ClientID;
 		foreach($this->events as $controlID => $event)
 		{
 			$control = $this->Parent->findObject($controlID);
 			if(!is_null($control))
 				$options['target']=$control->ClientID;
-		}	
+		}
 		return $options;
 	}
 
 	/**
-	 * Render the list of validator IDs as javascript array.
-	 * @return string client-side validator IDs javascript array. 
+	 * Render the list of validator IDs
+	 * @return array client-side validator IDs javascript array.
 	 */
-	protected function renderJsMembers()
+	protected function getGroupMembers()
 	{
 		$list = array();
 		foreach($this->getMembers() as $member)
 		{
 			$control = $this->Parent->findObject($member);
 			if(!is_null($control))
-				$list[] = '"'.$control->getUniqueID().'"';
+				$list[] = $control->getUniqueID();
 		}
-		return '['.implode(', ',$list).']';
+		return $list;
 	}
 }
 ?>

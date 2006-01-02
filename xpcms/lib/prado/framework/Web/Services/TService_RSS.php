@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail.com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:42 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.Services
  */
 
@@ -159,7 +159,7 @@ class TRSSInfo
 /**
  *
  * @author $Author: nexd $
- * @version $Id: TService_RSS.php,v 1.1 2005/12/05 17:24:42 nexd Exp $
+ * @version $Id: TService_RSS.php,v 1.2 2006/01/02 17:47:55 nexd Exp $
  */
 class TRSSDublicCore 
 {
@@ -175,7 +175,7 @@ class TRSSDublicCore
 /**
  *
  * @author $Author: nexd $
- * @version $Id: TService_RSS.php,v 1.1 2005/12/05 17:24:42 nexd Exp $
+ * @version $Id: TService_RSS.php,v 1.2 2006/01/02 17:47:55 nexd Exp $
  */
 class TRSSSyndication 
 {

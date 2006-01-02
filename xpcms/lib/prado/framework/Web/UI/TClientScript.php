@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:49 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.UI
  */
 
@@ -35,7 +35,7 @@
  * Namespace: System.Web.UI
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:49 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.UI
  */
 class TClientScript

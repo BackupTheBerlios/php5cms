@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 
@@ -32,7 +32,7 @@
  * http://gleepglop.com/javascripts/logger/
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:36 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:54 $
  * @package System.Web.UI.WebControls
  */
 class TJavascriptLogger extends TPanel
@@ -52,7 +52,8 @@ class TJavascriptLogger extends TPanel
 	 */
 	protected function renderMessage()
 	{
-		$info = '(<a href="http://gleepglop.com/javascripts/logger/" target="_blank">more info</a>).';
+		$pop = 'onclick="window.open(this.href); return false;" onkeypress="window.open(this.href); return false;"';
+		$info = '(<a href="http://gleepglop.com/javascripts/logger/" rel="external" '.$pop.' >more info</a>).';
 		$usage = 'Press ALT-D (Or CTRL-D on OS X) to toggle the javascript log console';
 		$this->addBody("{$usage} {$info}");
 	}

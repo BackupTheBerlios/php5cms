@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:42 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.Services
  */
 
@@ -60,7 +60,7 @@
  * Namespace: System.Web.Services
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:42 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.Services
  */
 class TCallbackPage extends TPage
@@ -96,13 +96,16 @@ class TCallbackPage extends TPage
 		$this->service =  new TService_Callback();
 
 		//set the service URI
-		$request = $this->getRequest();
-		$url = $request->constructUrl($request->getRequestedPage());
+		$url=$_SERVER['REQUEST_URI']; //is this always correct?
 		$NS = $this->service->server()->getUri()->getNS();
+
+		//create the URI
 		if($this->Request->getFormat() == TRequest::FORMAT_GET)
-			$this->service->server()->setUri(new TAjaxUri($url, $NS));
+			$uri = new TAjaxUri($url, $NS);
 		else
-			$this->service->server()->setUri(new TAjaxPathUri($url, $NS));
+			$uri = new TAjaxPathUri($url, $NS);
+
+		$this->service->server()->setUri($uri);
 
 		//add services
 		if($this->service->isServiceRequest())
@@ -154,6 +157,8 @@ class TCallbackPage extends TPage
 	 */
 	public function execute()
 	{
+		$this->service->register($this);
+
 		//Callback life-cycle
 		if($this->service->isServiceRequest())
 		{
@@ -169,7 +174,6 @@ class TCallbackPage extends TPage
 			$this->onPreInit(new TEventParameter);
 			$this->determinePostBackMode();
 			$this->onInitRecursive(new TEventParameter);
-			$this->service->register($this);
 
 			//a valid callback request
 			if($this->isCallBack())
@@ -227,18 +231,17 @@ class TCallbackPage extends TPage
 	}
 
 	/**
-	 * Register the callback script file.
+	 * Register the callback scripts.
 	 * @param TEventParameter pre-render parameters
 	 */
 	protected function onPreRender($param)
 	{
-		$this->registerClientScript('ajax');
-
-		if(!empty($this->callbacksCandidates)
-			&& !$this->isScriptFileRegistered(get_class($this)))
+		$key = '__callback_client'.get_class($this);
+		if(!$this->isEndScriptRegistered($key))
 		{
-			$script = $this->service->getClientUri();
-			$this->registerScriptFile(get_class($this), $script);
+			$this->registerClientScript('ajax');
+			$script = $this->service->server()->renderClientScript();
+			$this->registerEndScript($key, $script);
 		}
 		parent::onPreRender($param);
 	}
@@ -307,15 +310,11 @@ class TCallbackPage extends TPage
 	public function getCallbackReference($control, $args=null, $onSuccess=null)
 	{
 		$id = $this->getCallbackID($control);
-		if(!is_null($args))
-		{
-			$args = substr($args,0,11) == 'javascript:'
-								? substr($args,11) : "'{$args}'";
-		}
+		$argsJs = TJavascript::convert($args);
 		if(!is_null($onSuccess))
-			return "Prado.Callback('{$id}', $args, $onSuccess)";
+			return "Prado.Callback('{$id}', $argsJs, $onSuccess)";
 		if(!is_null($args))
-			return "Prado.Callback('{$id}', $args)";
+			return "Prado.Callback('{$id}', $argsJs)";
 		return "Prado.Callback('{$id}')";
 	}
 
@@ -339,7 +338,7 @@ class TCallbackPage extends TPage
  * Invalid request ID exception.
  *
  * @author Wei Zhuo<weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:42 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:47:55 $
  * @package System.Web.Services
  */
 class TCallbackInvalidRequestIDException extends TException
