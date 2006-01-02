@@ -49,14 +49,33 @@ class HomePage extends TPage
 	function updateItem($sender,$param)
 	{
 		$dataSource=$this->list->getDataSource();
-		$product=$dataSource[$param->item->ItemIndex];
+		$product= $this->findProductById($dataSource, $param->item->Data['id']);
 		$product['price']=floatval($param->item->Cells[2]->Bodies[0]->Text);
 		$product['quantity']=intval($param->item->Cells[3]->Bodies[0]->Text);
 		$product['imported']=$param->item->Cells[4]->importCheck->Checked;
-		$dataSource[$param->item->ItemIndex]=$product;
+		$this->updateProductById($dataSource, $product, $param->item->Data['id']);
 		$this->list->setSelectedItemIndex($param->item->ItemIndex);
 		$this->list->setDataSource($dataSource);
 		$this->list->dataBind();
+	}
+	
+	protected function findProductById($products, $id)
+	{
+		foreach($products as $product)
+		{
+			if($product['id'] == $id)
+				return $product;
+		}
+		return array();
+	}
+	
+	protected function updateProductById($products, $product, $id)
+	{
+		for($i = 0; $i < $products->length(); $i++)
+		{
+			if($products[$i]['id'] == $id)
+				$products[$i] = $product;
+		}
 	}
 
 	function deleteItem($sender,$param)

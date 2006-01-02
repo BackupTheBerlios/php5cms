@@ -2,7 +2,7 @@
 /**
  * PRADO Translation Editor.
  * @author $Author: nexd $
- * @version $Id: Editor.php,v 1.1 2005/12/05 17:24:38 nexd Exp $
+ * @version $Id: Editor.php,v 1.2 2006/01/02 18:52:50 nexd Exp $
  * @package prado.examples
  */
  

@@ -1,6 +1,28 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1DTD/xhtml1-transitional.dtd">
-<html>
+<!DOCTYPE html PUBLIC 
+	"-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+	
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
+	<title>TDataGrid Demo</title>
+	<style type="text/css">
+	/*<![CDATA[*/
+	body
+	{
+		font-family: Georgia, "Times New Roman", Times, serif;
+	}
+	.w3c
+	{
+		margin-top: 2em;
+		display: block;
+	}
+	/*]]>*/
+	</style>
+</head>
+
 <body>
+
 <h1>TDataGrid Demo</h1>
 <p>This demo shows a simple application of TDataGrid control.</p>
 <p>TDataGrid allows you to show as a table a list of data items (rows), edit, select and delete them. It also supports paging and sorting.</p>
@@ -28,7 +50,7 @@
 			OnSortCommand="sortItem"
 			OnPageCommand="pageItem">
 	<com:TButtonColumn Text="select" ButtonType="PushButton" HeaderText="Select" CommandName="select" ItemStyle="text-align:center" />
-	<com:THyperLinkColumn DataTextField="name" HeaderText="Name" NavigateUrl="http://www.xisc.com/" Target="_blank"/>
+	<com:THyperLinkColumn DataTextField="name" HeaderText="Name" NavigateUrl="http://www.xisc.com/" />
 	<com:TBoundColumn DataField="price" HeaderText="Price" SortExpression="price" DataFormatString="$%.2f" ItemStyle="color:green;text-align:right;"/>
 	<com:TBoundColumn DataField="quantity" HeaderText="Quantity" SortExpression="quantity" ItemStyle="text-align:right;"/>
 	<com:TTemplateColumn HeaderText="Imported" ItemStyle="text-align:center">
@@ -41,14 +63,20 @@
 	</com:TTemplateColumn>
 	<com:TEditCommandColumn ButtonType="PushButton" ItemStyle="text-align:center" HeaderText="Action" EditText="edit" UpdateText="update" CancelText="cancel" />
 </com:TDataGrid>
-<br/>Select which columns to display:<br/>
-<com:TCheckBoxList ID="columnSelect" RepeatColumns="4" SelectionMode="Multiple" AutoPostBack="true" OnSelectionChanged="toggleColumn">
+<p>Select which columns to display:</p>
+<com:TCheckBoxList ID="columnSelect" RepeatColumns="4" AutoPostBack="true" OnSelectionChanged="toggleColumn">
     <com:TListItem Text="Name" Value="1" Selected="true" />
 	<com:TListItem Text="Price" Value="2" Selected="true" />
 	<com:TListItem Text="Quantity" Value="3" Selected="true" />
 	<com:TListItem Text="Imported" Value="4" Selected="true" />
 </com:TCheckBoxList>
-<br/>Tip: hold down Ctrl when clicking to make single selection change.
+<p>Tip: hold down Ctrl when clicking to make single selection change.</p>
 </com:TForm> 
+
+<div class="w3c">
+<a href="http://validator.w3.org/check?uri=referer">
+		Validate XHTML 1.0
+</a>
+</div>
 </body>
 </html>

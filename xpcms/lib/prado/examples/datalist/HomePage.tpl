@@ -1,6 +1,28 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1DTD/xhtml1-transitional.dtd">
-<html>
+<!DOCTYPE html PUBLIC 
+	"-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+	
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
+	<title>TDataList Demo</title>
+	<style type="text/css">
+	/*<![CDATA[*/
+	body
+	{
+		font-family: Georgia, "Times New Roman", Times, serif;
+	}
+	.w3c
+	{
+		margin-top: 2em;
+		display: block;
+	}
+	/*]]>*/
+	</style>
+</head>
+
 <body>
+
 <h1>TDataList Demo</h1>
 <p>This demo shows a simple application of TDataList control.</p>
 <p>TDataList allows you to show a list of data items (rows), edit, select and delete them.</p>
@@ -8,7 +30,6 @@
 <com:TDataList ID="list"
 			CellPadding="2"
 			CellSpacing="3"
-			HorizontalAlign="Justify"
 			GridLines="Both"
 			RepeatColumns="1"
 			RepeatLayout="Table"
@@ -26,7 +47,7 @@
 			SelectedItemStyle="background-color:LightYellow;"
             style="border-width:1px;border-style:solid;font-family:Verdana;font-size:10pt;width:300px;border-collapse:collapse;">
 <prop:HeaderTemplate>
-<center><span style="font-weight:bold">Computer Parts</span></center>
+<div style="font-weight:bold; text-align:center;">Computer Parts</div>
 </prop:HeaderTemplate>
 <prop:FooterTemplate>
 Total <%=$this->Page->list->ItemCount %> products.
@@ -75,5 +96,11 @@ Total <%=$this->Page->list->ItemCount %> products.
 
 </com:TDataList>
 </com:TForm> 
+
+<div class="w3c">
+<a href="http://validator.w3.org/check?uri=referer">
+		Validate XHTML 1.0
+</a>
+</div>
 </body>
 </html>

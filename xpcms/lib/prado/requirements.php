@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Pim van der Zwet
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:43 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 18:52:50 $
  * @package prado
  */
 
@@ -72,7 +72,7 @@ $reqs['Magic quotes check'] = array("impact"=>MUSTHAVE, "evaluate"=>"!ini_get('m
 <body>
 <pre>
 
-<?=APPLICATION_NAME ?> REQUIREMENTS CHECKER $Revision: 1.1 $  $Date: 2005/12/05 17:24:43 $
+<?=APPLICATION_NAME ?> REQUIREMENTS CHECKER $Revision: 1.2 $  $Date: 2006/01/02 18:52:50 $
 --------------------------------------------------------------
 
 <?php
