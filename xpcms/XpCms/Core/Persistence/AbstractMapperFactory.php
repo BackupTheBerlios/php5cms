@@ -2,7 +2,7 @@
 /**
  * @package XpCms.Core.Persistence
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 abstract class AbstractMapperFactory implements IConfigurable {
 
@@ -124,8 +124,19 @@ abstract class AbstractMapperFactory implements IConfigurable {
 	 * used to retrieve <code>StructureGroup</code>-objects from the underlying
 	 * storage.
 	 * 
-	 * @return IStructureGroup The <code>IStructureGroupMapper</code>-instance.
+	 * @return IStructureGroupMapper The <code>IStructureGroupMapper</code>
+     *                               instance.
 	 */
 	public abstract function createStructureGroupMapper();
+    
+    /**
+     * Creates an instance of <code>IAssetMapper</code>. This mapper is
+     * used to retrieve <code>AbstractAsset</code>-objects from the underlying
+     * storage.
+     * 
+     * @return IAssetMapper The <code>IAssetMapper</code>-instance.
+     * 
+     */
+    public abstract function createAssetMapper();
 }
 ?>

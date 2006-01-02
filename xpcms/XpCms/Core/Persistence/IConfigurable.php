@@ -4,9 +4,19 @@
  * 
  * @package XpCms.Core.Persistence
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 interface IConfigurable {
+    
+    /**
+     * This constant is used to set the language property for a query.
+     */
+    const LANGUAGE = 'language';
+    
+    /**
+     * This constant is used to the object status for a query
+     */
+    const STATUS = 'status';
 	
 	/**
 	 * Returns a property value for the given <code>$name</code> or a 

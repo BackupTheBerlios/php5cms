@@ -5,7 +5,7 @@
  * 
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 class StructureGroupMapper 
     extends AbstractBaseMapper 
@@ -65,33 +65,30 @@ class StructureGroupMapper
      * given <code>$id</code> or <code>null</code> if it doesn't exist.
      * 
      * @param integer $id The <code>StructureGroup</code> identifier.
+     * @param string $locale The language of the requested assets.
      * @return mixed The <code>StructureGroup</code>-object or <code>null</code>
      */
-	public function findById($id) {
+	public function findById($id, $locale) {
 
 		if (!isset ($this->objectToIdMap[$id])) {
 
 			$sql = sprintf(
                      'SELECT 
 			                 sg1.id, sgd1.language, sgd1.name,
-                             sgd1.text, sg1.alias
+                             sgd1.description, sg1.alias
 			            FROM
 							 %s AS sg1, 
 							 %s AS sgd1 
 					   WHERE
-						     sg1.id = ? AND sgd1.group_fid = sg1.id', 
+						     sg1.id = ? AND sgd1.group_fid = sg1.id AND
+                             sgd1.language = ?', 
                       $this->groupTableName, $this->detailTableName);
-
-			$lang = $this->getProperty(IConfigurable::LANGUAGE);
-			if ($lang !== null) {
-				$sql .= ' AND sgd1.language = ?';
-			}
 
 			// Create a prepared statement
 			$stmt = $this->conn->prepareStatement($sql);
 			// Set some basic params
 			$stmt->setInt(1, $id);
-			$stmt->setString(2, $lang);
+			$stmt->setString(2, $locale);
 			$stmt->setOffset(0);
 			$stmt->setLimit(1);
 
@@ -102,7 +99,7 @@ class StructureGroupMapper
 			$structureGroup = null;
 			// Do we have any record?
 			if ($rs->getRecordCount() > 0 && $rs->first()) {
-                $structureGroup = $this->createStructureGroupFromRecord($rs);
+                $structureGroup = $this->populateStructureGroup($rs);
 			}
 
 			$rs->close();
@@ -121,36 +118,34 @@ class StructureGroupMapper
      * 
      * @param string $alias The alias name for the parent 
      *                      <code>StructureGroup</code>.
+     * @param string $locale The language of the requested assets.
      * @return ArrayAccess An <code>ArrayAccess</code>-object with all sub
      *                     <code>StructureGroup</code>s.
      */
-    public function findSubGroupsByAlias($alias) {
+    public function findSubGroupsByAlias($alias, $locale) {
 
         $sql = sprintf(
                  'SELECT 
                          sg2.id, sgd1.language, sgd1.name,
-                         sgd1.text, sg2.alias
+                         sgd1.description, sg2.alias
                     FROM
                          %s AS sg1,
                          %s AS sg2,
                          %s AS sgd1 
                    WHERE
                          sg1.alias = ? AND
-                         sg2.group_fid = sg1.id AND sgd1.group_fid = sg2.id', 
+                         sg2.group_fid = sg1.id AND
+                         sgd1.group_fid = sg2.id AND
+                         sgd1.language = ?', 
                   $this->groupTableName, 
                   $this->groupTableName,
                   $this->detailTableName);
-
-        $lang = $this->getProperty(IConfigurable::LANGUAGE);
-        if ($lang !== null) {
-            $sql .= ' AND sgd1.language = ?';
-        }
 
         // Create a prepared statement
         $stmt = $this->conn->prepareStatement($sql);
         // Set some basic params
         $stmt->setString(1, $alias);
-        $stmt->setString(2, $lang);
+        $stmt->setString(2, $locale);
 
         // Lets execute
         $rs = $stmt->executeQuery();
@@ -159,7 +154,7 @@ class StructureGroupMapper
         $structureGroups = new ArrayObject();
         // Do we have any record?
         while ($rs->next()) {
-            $structureGroups[] = $this->createStructureGroupFromRecord($rs);
+            $structureGroups[] = $this->populateStructureGroup($rs);
         }
 
         $rs->close();
@@ -169,7 +164,7 @@ class StructureGroupMapper
     }
     
     
-    private function createStructureGroupFromRecord(ResultSet $rs) {
+    private function populateStructureGroup(ResultSet $rs) {
         
         $id    = $rs->getInt('id');
         $alias = $rs->getString('alias');
@@ -181,7 +176,7 @@ class StructureGroupMapper
             $structureGroup->setAlias($alias);
             $structureGroup->setLanguage($rs->getString('language'));
             $structureGroup->setName($rs->getString('name'));
-            $structureGroup->setDescription($rs->getString('text'));
+            $structureGroup->setDescription($rs->getString('description'));
             
             $this->objectToIdMap[$id]       = $structureGroup;
             $this->objectToAliasMap[$alias] = $structureGroup;

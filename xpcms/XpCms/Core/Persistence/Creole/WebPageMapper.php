@@ -4,7 +4,7 @@
  *
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
 
@@ -33,12 +33,14 @@ class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
 	 * there is no record for <code>$id</code> it will return <code>null</code>.
 	 * 
 	 * @param integer $id The <code>WebPage</code> identifier.
+     * @param mixed $status The status of the <code>WebPage</code>-object
+     *                      This is an optional parameter.
 	 * @return mixed A <code>WebPage</code>-instance or <code>null</code>. 
 	 */
-	public function findById($id) {
+	public function findById($id, $status = 1) {
 		
 		// Get the sql fragment for the web page status
-		$status = $this->getStatusSQL();
+		$statusSQL = $this->getStatusSQL($status);
 		
 		$sql = sprintf(
 					'SELECT
@@ -46,7 +48,7 @@ class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
 					   FROM %s 
 					  WHERE
 					   id = ? AND status IN (%s)',
-					$this->pageTableName, $status);
+					$this->pageTableName, $statusSQL);
 		
 		// Create a prepared sql statement
 		$stmt = $this->conn->prepareStatement($sql);
@@ -70,44 +72,29 @@ class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
 	}
 
 	/**
-	 * This method returns a <code>WebPage</code>-object for the given
-	 * <code>$collection</code> or <code>null</code> if it doesn't exist.
-	 *
-	 * @param WebCollection $collection The web collection instance
-	 * @return mixed A WebCollection object or null.
-	 * @see WebPageMapper::findByCollectionId();
-	 */
-	public function findByCollection(WebCollection $collection) {
-		return $this->findByCollectionId($collection->getId());
-	}
-
-	/**
 	 * This method returns a <code>WebPage</code>-objecz for the given
 	 * collection <code>$colId</code> or <code>null</code> if it doesn't exist.
 	 *
 	 * @param integer $colId The id of the parent collection.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
 	 * @return mixed The WebCollection object or null.
 	 */
-	public function findByCollectionId($colId) {
+	public function findByCollectionId($colId, $locale, $status = 1) {
 
 		// get the allowed status values
-		$status = $this->getStatusSQL();
+		$statusSQL = $this->getStatusSQL($status);
 
 		$sql = sprintf(
                      'SELECT * FROM %s WHERE 
-                        collection_fid = ? AND status IN (%s)',
-                     $this->pageTableName, $status);
-
-		// special language settings?
-		$lang = $this->getProperty(IConfigurable::LANGUAGE);
-		if (!is_null($lang)) {
-			$sql .= sprintf(" AND language = ?");
-		}
+                        collection_fid = ? AND language = ? AND status IN (%s)',
+                     $this->pageTableName, $statusSQL);
 
 		// create and setup the statement
 		$stmt = $this->conn->prepareStatement($sql);
 		$stmt->setInt(1, $colId);
-		$stmt->setString(2, $lang);
+		$stmt->setString(2, $locale);
 		$stmt->setLimit(1);
 
 		// let's exec
@@ -192,26 +179,21 @@ class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
     
     /**
      * This method removes all <code>WebPage</code>-objects from the storage 
-     * that belong to the given <code>WebCollection</code>.
+     * that belong to the given <code>WebCollection</code> identifier.
      * 
-     * @param WebCollection $collection The context <code>WebCollection</code>.
+     * @param integer $colId The id of the parent collection.
      * 
      * @throws Exception If the given <code>WebCollection</code> doesn't exist.
      */
-    public function deleteByCollection(WebCollection $collection) {
-    		
-    		// Has this collection an id?
-    		if (($collId = $collection->getId()) <= 0) {
-    			throw new Exception('The given WebCollection doesn\'t exist.');	
-    		}	
-    		
+    public function deleteByCollectionId($colId) {
+
     		$sql = sprintf(
 					'DELETE FROM %s WHERE collection_fid = ?',
 					$this->pageTableName);
 		// Create a sql statement
 		$stmt = $this->conn->prepareStatement($sql);
 		// Set params
-		$stmt->setInt(1, $collId);
+		$stmt->setInt(1, $colId);
 		
 		$stmt->executeUpdate();
 		$stmt->close();

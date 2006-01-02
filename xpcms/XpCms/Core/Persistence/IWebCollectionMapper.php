@@ -3,7 +3,7 @@
 /**
  * @package XpCms.Core.Persistence
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 interface IWebCollectionMapper extends IConfigurable {
 	
@@ -13,24 +13,33 @@ interface IWebCollectionMapper extends IConfigurable {
 	 * it returns <code>null</code>
 	 * 
 	 * @param integer $id The IWebCollection identifier.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
 	 * @param boolean $loadPage Load the associated web page.
 	 * @return mixed An instance of <code>IWebCollection</code> or 
 	 *               <code>null</code>.  
 	 */
-	public function findById($id, $loadPage = true);
+	public function findById($id, $locale, $status = 1, $loadPage = true);
 
 	/**
 	 * This method finds all <code>WebCollection</code>s that belong to the
-	 * given <code>StructureGroup</code>. It also loads the associated 
+	 * given <code>StructureGroup</code> id. It also loads the associated 
 	 * <code>WebPage</code>s by default. You can remove this feature if you set
 	 * the second parameter <code>$loadPage</code> to <code>false</code>
 	 * 
-	 * @param StructureGroup $group The group to search for.
+	 * @param integer $groupId The group to search for.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
 	 * @param boolean $loadPage Should this method load the associated web pages
 	 *                          also? By default this is <code>true</code>.
 	 * @return ArrayObject This container holds all top level collections. 
 	 */
-	public function findByGroup(StructureGroup $group, $loadPage = true);
+	public function findByGroupId($groupId, 
+                                  $locale, 
+                                  $status = 1, 
+                                  $loadPage = true);
     
     /**
      * This method finds all <code>WebCollection</code>s that belong to the 
@@ -39,11 +48,39 @@ interface IWebCollectionMapper extends IConfigurable {
      * associated <code>WebPage</code>-objects.
      * 
      * @param string $groupAlias The alias for the group.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
      * @param boolean $loadPage Should this method load the associated web pages
      *                          also? By default this is <code>true</code>.
      * @return ArrayObject This container holds all top level collections.
      */
-    public function findByGroupAlias($groupAlias, $loadPage = true);
+    public function findByGroupAlias($groupAlias, 
+                                     $locale, 
+                                     $status = 1, 
+                                     $loadPage = true);
+    
+    /**
+     * This method tries to find a single <code>WebCollection</code> by its 
+     * alias path. If a <code>WebCollection</code> for the given 
+     * <code>$aliasPath</code> exists this method returns an object instance
+     * otherwise it returns <code>null</code>. If the second parameter is 
+     * <code>true</code> it will also load the associated <code>WebPage</code>
+     * objects.
+     * 
+     * @param array $aliasPath The path for the <code>WebCollection</code>.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
+     * @param boolean $loadPage Should this method load the associated web pages
+     *                          also? By default this is <code>true</code>.
+     * @return mixed An instance of <code>IWebCollection</code> or 
+     *               <code>null</code>.  
+     */
+    public function findByAliasPath($aliasPath, 
+                                    $locale, 
+                                    $status = 1, 
+                                    $loadPage = true);
 	
 	/**
 	 * This method inserts or updates the given <code>WebCollection</code> with

@@ -5,7 +5,7 @@
  * 
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 abstract class AbstractBaseMapper implements IConfigurable {
 	
@@ -109,9 +109,21 @@ abstract class AbstractBaseMapper implements IConfigurable {
 	/**
 	 * Returns a sql/string fragment with the chooseable status falgs.
 	 * 
+     * @param mixed $status The object status. This can be a simple integer or
+     *                      an array.
 	 * @return string The allowed status flags.  
 	 */
-	protected function getStatusSQL() {
+	protected function getStatusSQL($status = null) {
+        
+        if ($status !== null) {
+            if (is_array($status)) {
+                $statusSQL = implode(', ', array_map('intval', $status));
+            } else {
+                $statusSQL = intval($status);
+            }
+            return $statusSQL;
+        }
+        
 		// By default just active items
 		$status = '1';
 		

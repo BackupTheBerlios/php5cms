@@ -21,7 +21,7 @@ GROUP BY
 
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper
@@ -87,16 +87,19 @@ class WebCollectionMapper
 	 * This method finds a single <code>WebCollection</code>-object by its id.
 	 * If no <code>WebCollection</code> for the given id exists, it returns
 	 * <code>null</code>.
-	 *
-	 * @param integer $id The <code>$id</code> for the
-	 *                    <code>WebCollection</code>.
-	 * @param boolean $loadPage Load the associated web page and group.
-	 * @return mixed The <code>WebCollection</code> object or <code>null</code>.
-	 */
-	public function findById($id, $loadPage = true) {
+     *
+     * @param integer $id The IWebCollection identifier.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
+     * @param boolean $loadPage Load the associated web page.
+     * @return mixed An instance of <code>IWebCollection</code> or 
+     *               <code>null</code>.  
+     */
+    public function findById($id, $locale, $status = 1, $loadPage = true) {
 
 		// get the allowed status values.
-		$status = $this->getStatusSQL();
+		$statusSQL = $this->getStatusSQL($status);
 
 		// raw sql query string
 		if ($loadPage) {
@@ -120,12 +123,13 @@ class WebCollectionMapper
 						    wc1.id = ? AND wc1.status IN (%s) AND
 						    wp1.collection_fid = wc1.id AND
 						    sgns1.collection_fid = wc1.id AND
-						    wp1.status IN (%s)',
+						    wp1.status IN (%s) AND
+                            wp1.language = ?',
 						$this->collTableName,
 						$this->pageTableName,
 						$this->nestedSetTableName,
                         $this->pageClassTableName,
-						$status, $status);
+						$statusSQL, $statusSQL);
 		} else {
 			$sql = sprintf(
 						'SELECT
@@ -140,20 +144,13 @@ class WebCollectionMapper
                             wc1.id = cp1.collection_fid 
 						 WHERE
 						   wc1.id = ? AND wc1.status IN (%s) AND
-						   sgns1.collection_fid = wc1.id',
+						   sgns1.collection_fid = wc1.id AND
+                           wp1.language = ?',
 						$this->collTableName,
 						$this->pageTableName,
 						$this->nestedSetTableName,
                         $this->pageClassTableName,
-						$status);
-		}
-
-		// is a language available?
-		$lang = $this->getProperty(IConfigurable::LANGUAGE);
-
-		// if it is append language part
-		if (!is_null($lang)) {
-			$sql .= sprintf("  AND wp1.language = ?");
+						$statusSQL);
 		}
 
 		// create a prepared statement
@@ -161,7 +158,7 @@ class WebCollectionMapper
 
 		// set required parameters
 		$stmt->setInt(1, $id);
-		$stmt->setString(2, $lang);
+		$stmt->setString(2, $locale);
 		$stmt->setOffset(0);
 		$stmt->setLimit(1);
 
@@ -173,7 +170,6 @@ class WebCollectionMapper
 
 		// Is there a collection for the given id?
 		if ($result->getRecordCount() > 0 && $result->first()) {
-
 			$collection = $this->createCollectionFromRecord($result);
 		}
 
@@ -184,20 +180,26 @@ class WebCollectionMapper
 	}
 
 	/**
-	 * This method finds all <code>WebCollection</code>s that belong to the
-	 * given <code>StructureGroup</code>. It also loads the associated
-	 * <code>WebPage</code>s by default. You can remove this feature if you set
-	 * the second parameter <code>$loadPage</code> to <code>false</code>
-	 *
-	 * @param StructureGroup $group The group to search for.
-	 * @param boolean $loadPage Should this method load the associated web pages
-	 *                          also? By default this is <code>true</code>.
-	 * @return ArrayObject This container holds all top level collections.
-	 */
-	public function findByGroup(StructureGroup $group, $loadPage = true) {
+     * This method finds all <code>WebCollection</code>s that belong to the
+     * given <code>StructureGroup</code> id. It also loads the associated 
+     * <code>WebPage</code>s by default. You can remove this feature if you set
+     * the second parameter <code>$loadPage</code> to <code>false</code>
+     * 
+     * @param integer $groupId The group to search for.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
+     * @param boolean $loadPage Should this method load the associated web pages
+     *                          also? By default this is <code>true</code>.
+     * @return ArrayObject This container holds all top level collections. 
+     */
+    public function findByGroupId($groupId, 
+                                  $locale, 
+                                  $status = 1, 
+                                  $loadPage = true) {
 
         // get the allowed status values.
-        $status = $this->getStatusSQL();
+        $statusSQL = $this->getStatusSQL($status);
 
         if ($loadPage) {
             $sql = sprintf(
@@ -226,14 +228,16 @@ class WebCollectionMapper
                        sgns2.group_fid=sg1.id AND
                        sgns2.lft > sgns1.lft AND sgns2.rgt < sgns1.rgt AND
                        wc1.id=sgns2.collection_fid AND wc1.status IN(%s) AND
-                       wp1.status IN(%s) AND wp1.collection_fid = wc1.id',
+                       wp1.status IN(%s) AND wp1.collection_fid = wc1.id AND
+                       wp1.language = ?
+                     GROUP BY sgns2.lft ASC',
                     $this->groupTableName,
                     $this->nestedSetTableName,
                     $this->nestedSetTableName,
                     $this->collTableName,
                     $this->pageTableName,
                     $this->pageClassTableName,
-                    $status, $status);
+                    $statusSQL, $statusSQL);
         } else {
             $sql = sprintf(
                     'SELECT
@@ -255,29 +259,24 @@ class WebCollectionMapper
                        sgns1.group_fid=sg1.id AND sgns1.collection_fid=-1 AND
                        sgns2.group_fid=sg1.id AND
                        sgns2.lft > sgns1.lft AND sgns2.rgt < sgns1.rgt AND
-                       wc1.id=sgns2.collection_fid AND wc1.status IN(%s)',
+                       wc1.id=sgns2.collection_fid AND wc1.status IN(%s) AND
+                       wp1.language = ?
+                     GROUP BY sgns2.lft ASC',
                     $this->groupTableName,
                     $this->nestedSetTableName,
                     $this->nestedSetTableName,
                     $this->collTableName,
                     $this->pageTableName,
                     $this->pageClassTableName,
-                    $status);
+                    $statusSQL);
         }
-		// language specific settings?
-        $lang = $this->getProperty(IConfigurable::LANGUAGE);
-        if ($lang !== null) {
-            $sql .= " AND wp1.language = ?";
-        }
-
-        $sql .= " GROUP BY sgns2.lft ASC";
 
         // Create a prepared statement
         $stmt = $this->conn->prepareStatement($sql);
-        $stmt->setInt(1, $group->getId());
-        $stmt->setString(2, $lang);
-        
-        return $this->createCollectionTreeFromStatement($stmt, $group);
+        $stmt->setInt(1, $groupId);
+        $stmt->setString(2, $locale);
+        #print $sql;
+        return $this->createCollectionTreeFromStatement($stmt);
 	}
     
     /**
@@ -287,14 +286,20 @@ class WebCollectionMapper
      * associated <code>WebPage</code>-objects.
      * 
      * @param string $groupAlias The alias for the group.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
      * @param boolean $loadPage Should this method load the associated web pages
      *                          also? By default this is <code>true</code>.
      * @return ArrayObject This container holds all top level collections.
      */
-    public function findByGroupAlias($groupAlias, $loadPage = true) {
+    public function findByGroupAlias($groupAlias, 
+                                     $locale, 
+                                     $status = 1, 
+                                     $loadPage = true) {
         
         // get the allowed status values.
-        $status = $this->getStatusSQL();
+        $statusSQL = $this->getStatusSQL($status);
         
         $sql = 'SELECT
                   sgns2.lft, sgns2.rgt, sgns2.group_fid,
@@ -315,7 +320,9 @@ class WebCollectionMapper
                   sgns1.group_fid=sg1.id AND sgns1.collection_fid=-1 AND
                   sgns2.group_fid=sg1.id AND
                   sgns2.lft > sgns1.lft AND sgns2.rgt < sgns1.rgt AND
-                  wc1.id=sgns2.collection_fid AND wc1.status IN(%s) %s';
+                  wc1.id=sgns2.collection_fid AND wc1.status IN(%s) AND
+                  wp1.language = ? %s
+                  GROUP BY sgns2.lft ASC';
         
         $select = '';
         $where  = '';
@@ -329,7 +336,7 @@ class WebCollectionMapper
                        wp1.language AS wp_language';
             $where = sprintf(' AND
                        wp1.status IN(%s) AND wp1.collection_fid = wc1.id',
-                       $status);
+                       $statusSQL);
         }
         
         $sql = sprintf($sql,
@@ -340,20 +347,12 @@ class WebCollectionMapper
                     $this->collTableName,
                     $this->pageTableName,
                     $this->pageClassTableName,
-                    $status, $where);
-        
-        // language specific settings?
-        $lang = $this->getProperty(IConfigurable::LANGUAGE);
-        if ($lang !== null) {
-            $sql .= " AND wp1.language = ?";
-        }
-
-        $sql .= " GROUP BY sgns2.lft ASC";
+                    $statusSQL, $where);
 
         // Create a prepared statement
         $stmt = $this->conn->prepareStatement($sql);
         $stmt->setString(1, $groupAlias);
-        $stmt->setString(2, $lang);
+        $stmt->setString(2, $locale);
         
         return $this->createCollectionTreeFromStatement($stmt);
     }
@@ -367,6 +366,9 @@ class WebCollectionMapper
      * objects.
      * 
      * @param array $aliasPath The path for the <code>WebCollection</code>.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
      * @param boolean $loadPage Should this method load the associated web pages
      *                          also? By default this is <code>true</code>.
      * @return mixed An instance of <code>IWebCollection</code> or 
@@ -375,7 +377,7 @@ class WebCollectionMapper
      * @throws InvalidArgumentException If the given <code>$aliasPath</code> is
      *                                  not an array or the array is empty.  
      */
-    public function findByAliasPath($aliasPath, $loadPage = true) {
+    public function findByAliasPath($aliasPath, $locale, $status = 1, $loadPage = true) {
         
         if (!is_array($aliasPath)) {
             throw new InvalidArgumentException(
@@ -387,7 +389,7 @@ class WebCollectionMapper
         
         
         // get the allowed status values.
-        $status = $this->getStatusSQL();
+        $statusSQL = $this->getStatusSQL($status);
         
         $collName = '';
         
@@ -415,7 +417,8 @@ class WebCollectionMapper
                   %s.id = cp1.collection_fid 
                 WHERE
                   %s
-                  sgns1.collection_fid=%s.id AND %s.status IN(%s) %s';
+                  sgns1.collection_fid=%s.id AND %s.status IN(%s) AND
+                  wp1.language = ? %s';
         
         $select = '';
         $where2 = '';
@@ -428,7 +431,7 @@ class WebCollectionMapper
                        wp1.language AS wp_language';
             $where2 = sprintf(' AND
                        wp1.status IN(%s) AND wp1.collection_fid = %s.id',
-                       $status, $collName);
+                       $statusSQL, $collName);
         }
         
         $sql = sprintf($sql,
@@ -441,14 +444,9 @@ class WebCollectionMapper
                     $collName,
                     $where1,
                     $collName, $collName,
-                    $status,
+                    $statusSQL,
                     $where2);
                     
-        $lang = $this->getProperty(IConfigurable::LANGUAGE);
-        if ($lang !== null) {
-            $sql .= " AND wp1.language = ?";
-        }
-
         $sql .= sprintf(" GROUP BY %s.id", $collName);
 
         $idx = 1;
@@ -459,7 +457,7 @@ class WebCollectionMapper
         foreach ($aliasPath as $aliasElem) {
             $stmt->setString($idx++, $aliasElem);
         }
-        $stmt->setString($idx, $lang);
+        $stmt->setString($idx, $locale);
         
         // lets execute
         $result = $stmt->executeQuery();
@@ -798,7 +796,7 @@ class WebCollectionMapper
 
 			
 			$wpm = AbstractMapperFactory::getInstance()->createWebPageMapper();
-			$wpm->deleteByCollection($collection);
+			$wpm->deleteByCollectionId($collection->getId());
 
             // Remove the collection from it's parent if it is set
             $parent = $collection->getParentCollection();

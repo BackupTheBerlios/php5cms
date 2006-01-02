@@ -1,8 +1,9 @@
 <?php
 require_once 'XpCms/Core/Domain/AbstractAsset.php';
 
-require_once 'XpCms/Core/Persistence/Sql/TableClassMapping.php';
-require_once 'XpCms/Core/Persistence/Sql/ColumnPropertyMapping.php';
+require_once 'XpCms/Core/Persistence/ORM/TableClassMapping.php';
+require_once 'XpCms/Core/Persistence/ORM/ColumnPropertyMapping.php';
+require_once 'XpCms/Core/Persistence/ORM/QueryBuilder.php';
 
 /**
  * Creole based mapper for assets.
@@ -12,7 +13,7 @@ require_once 'XpCms/Core/Persistence/Sql/ColumnPropertyMapping.php';
  *  
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
     
@@ -26,16 +27,6 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
      * @todo Implement this in a cleaner and better way!!!
      */
     private $mapping = array();
-    
-    private $baseMapping = array(
-        array('column' => 'asset_id',       'property' => 'Id'),
-        array('column' => 'asset_coll_fid', 'property' => 'CollectionId'),
-        array('column' => 'asset_lang',     'property' => 'Language'),
-        array('column' => 'asset_name',     'property' => 'Name'),
-        array('column' => 'asset_desc',     'property' => 'Description'),
-        array('column' => 'asset_status',   'property' => 'Status'),
-        array('column' => 'asset_pos',      'property' => 'Position'),
-        array('column' => 'asset_group',    'property' => 'GroupId'));
                                   
     private $baseSelectLangQuery = 'SELECT
                                   a1.id AS asset_id, 
@@ -44,14 +35,22 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
                                   a1.name AS asset_name, 
                                   a1.description AS asset_desc,
                                   a1.state AS asset_status,
+                                  sg1.alias AS group_alias,
+                                  sgd1.language AS group_lang,
+                                  sgd1.name AS group_name,
+                                  sgd1.description AS group_desc,
                                   wpa.position AS asset_pos,
-                                  wpa.group_fid AS asset_group%s
+                                  wpa.group_fid AS asset_group_fid%s
                                 FROM
+                                  %s AS sg1,
+                                  %s AS sgd1,
                                   %s AS a1, 
                                   %s AS a2, 
                                   %s AS wpa
                                 WHERE
                                   wpa.web_page_fid = ? AND
+                                  sgd1.group_fid = wpa.group_fid AND
+                                  sg1.id = wpa.group_fid AND 
                                   a1.id = wpa.asset_fid AND
                                   a1.state IN (%s) AND
                                   a1.language = ? AND
@@ -64,14 +63,22 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
                                   a1.name AS asset_name, 
                                   a1.description AS asset_desc,
                                   a1.state AS asset_status,
+                                  sg1.alias AS group_alias,
+                                  sgd1.language AS group_lang,
+                                  sgd1.name AS group_name,
+                                  sgd1.description AS group_desc,
                                   wpa.position AS asset_pos,
-                                  wpa.group_fid AS asset_group%s
+                                  wpa.group_fid AS asset_group_fid%s
                                 FROM
+                                  %s AS sg1,
+                                  %s AS sgd1,
                                   %s AS a1, 
                                   %s AS a2, 
                                   %s AS wpa
                                 WHERE
                                   wpa.web_page_fid = ? AND
+                                  sgd1.group_fid = wpa.group_fid AND
+                                  sg1.id = wpa.group_fid AND
                                   a1.id = wpa.asset_fid AND
                                   a1.state IN (%s) AND
                                   a2.asset_fid = a1.id';
@@ -79,6 +86,10 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
     private $selectUnionNoLang;
     
     private $selectUnionLang;
+    
+    private $groupTableName = 'structure_group';
+    
+    private $detailTableName = 'structure_group_detail';
                                   
     private $pageToAssetTableName = 'web_page_to_asset';
     
@@ -93,12 +104,16 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
     public function __construct(Connection $conn) {
         parent::__construct($conn);
         
-        $this->pageToAssetTableName = $this->prepareTableName(
-                $this->pageToAssetTableName);
-        $this->assetTableName = $this->prepareTableName($this->assetTableName);
+        $this->groupTableName       = $this->prepareTableName($this->groupTableName);
+        $this->detailTableName      = $this->prepareTableName($this->detailTableName);
+        $this->pageToAssetTableName = $this->prepareTableName($this->pageToAssetTableName);
+        $this->assetTableName       = $this->prepareTableName($this->assetTableName);
+        
         
         // TODO : Implement this in a cleaner and better way!!!
         // {{{
+        
+        #new QueryBuilder($this->properties);
         
         $mapping   = array();
         $mapping[] = new TableClassMapping('AssetText', 'asset_text', array(
@@ -119,7 +134,7 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
     
     /**
      * This method returns all <code>AbstractAsset</code>-objects for the given
-     * <code>$webPage</code>. The different asset types are returned in their
+     * <code>$id</code>. The different asset types are returned in their
      * <code>StructureGroup</code>-objects. So you have a structure like this:
      * 
      * <pre>
@@ -135,33 +150,28 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
      *   }
      * </pre> 
      * 
-     * If the given <code>WebPage</code> doesn't contain any assets an empty
+     * If the given <code>$id</code> doesn't contain any assets an empty
      * <code>ArrayAccess</code>-object will be returned.
      * 
-     * @param WebPage $webPage The context <code>WebPage</code>-object for the
-     *                         asset query.
+     * @param integer $id The context <code>WebPage</code> identifier for the
+     *                    asset query.
+     * @param string $locale The language of the requested assets.
+     * @param mixed $status The status of the <code>AbstractAsset</code>-objects
+     *                      This is an optional parameter.
      * @return ArrayAccess An <code>ArrayAccess</code>-object that contains all
      *                     <code>AbstractAsset</code>s in their 
      *                     <code>StructureGroup</code>s.
      */
-    public function findByWebPage(WebPage $webPage) {
+    public function findByWebPage($id, $locale, $status = 1) {
         
-        $status = $this->getStatusSQL();
-        $lang   = $this->getProperty(IConfigurable::LANGUAGE);
-        if ($lang === null) {
-            $sql = $this->selectUnionNoLang;
-            $inc = 1;
-        } else {
-            $sql = $this->selectUnionLang;
-            $inc = 2;
-        }
+        $status = $this->getStatusSQL($status);
 
-        $sql  = preg_replace('#\{status\}#', $status, $sql);
+        $sql  = preg_replace('#\{status\}#', $status, $this->selectUnionLang);
         $stmt = $this->conn->prepareStatement($sql);
         
-        for ($i = 0, $j = (sizeof($this->mapping) * $inc); $i < $j; $i+=$inc) {
-            $stmt->setInt($i + 1, $webPage->getId());
-            $stmt->setString($i + 2, $lang);
+        for ($i = 0, $j = sizeof($this->mapping) * 2; $i < $j; $i += 2) {
+            $stmt->setInt($i + 1, $id);
+            $stmt->setString($i + 2, $locale);
         }
         
         $rs = $stmt->executeQuery();
@@ -169,13 +179,16 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
         $groups = new ArrayObject();
         
         while ($rs->next()) {
-            $asset = $this->createAssetFromRecord($rs);
+            $asset = $this->populateAsset($rs);
 
             if (!$groups->offsetExists($asset->GroupId)) {
                 
                 $group = new StructureGroup();
-                $group->Id = $asset->GroupId;
-                $group->Groupables = new ArrayObject();
+                $group->Id          = $asset->GroupId;
+                $group->Alias       = $rs->getString('group_alias');
+                $group->Language    = $rs->getString('group_lang');
+                $group->Name        = $rs->getString('group_name');
+                $group->Description = $rs->getString('group_desc'); 
                 
                 $groups->offsetSet($asset->GroupId, $group);
                 
@@ -183,11 +196,11 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
             
             $groups->offsetGet($asset->GroupId)->Groupables[] = $asset;
         }
-        return $group;
+        return $groups;
     }
     
     
-    protected function createAssetFromRecord(ResultSet $rs) {
+    protected function populateAsset(ResultSet $rs) {
         
         $type = $rs->getString('asset_type');
         if (!isset($this->mapping[$type])) {
@@ -198,10 +211,14 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
         $mapping = $this->mapping[$type];
         
         $asset = new $mapping['class']();
-        
-        foreach ($this->baseMapping as $map) {
-            $asset->{$map['property']} = $rs->get($map['column']);
-        }
+        $asset->Id           = $rs->getInt('asset_id');
+        $asset->CollectionId = $rs->getInt('asset_coll_fid');
+        $asset->GroupId      = $rs->getInt('asset_group_fid');
+        $asset->Status       = $rs->getInt('asset_status');
+        $asset->Position     = $rs->getInt('asset_pos');
+        $asset->Language     = $rs->getString('asset_lang');
+        $asset->Name         = $rs->getString('asset_name');
+        $asset->Description  = $rs->getString('asset_desc'); 
         
         foreach ($mapping['map'] as $map) {
             if (isset($map['property'])) {    
@@ -333,6 +350,8 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
             $select1 = sprintf(
                     $this->baseSelectQuery, 
                     $assetSelect,
+                    $this->groupTableName,
+                    $this->detailTableName,
                     $this->assetTableName,
                     $preparedTableName,
                     $this->pageToAssetTableName,
@@ -341,6 +360,8 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
             $select2 = sprintf(
                     $this->baseSelectLangQuery, 
                     $assetSelect,
+                    $this->groupTableName,
+                    $this->detailTableName,
                     $this->assetTableName,
                     $preparedTableName,
                     $this->pageToAssetTableName,
@@ -354,17 +375,16 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
             $unionNoLang[] = $select1;
             $unionLang[]   = $select2;
         }
-        #print_r($unionNoLang);
+
         // Create both union queries
         $this->selectUnionNoLang = sprintf(
-                '(%s) ORDER BY asset_group, asset_pos', 
+                '(%s) ORDER BY asset_group_fid, asset_pos', 
                 implode(")\nUNION\n(", $unionNoLang));
         $this->selectUnionLang = sprintf(
-                '(%s) ORDER BY asset_group, asset_pos', 
+                '(%s) ORDER BY asset_group_fid, asset_pos', 
                 implode(")\nUNION\n(", $unionLang));
         
         $this->mapping = $mappings;
     }
-    
 }
 ?>
