@@ -5,7 +5,7 @@
  *
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 class StructureGroup extends DynamicPropertyObject {
 	
@@ -44,19 +44,31 @@ class StructureGroup extends DynamicPropertyObject {
 	 * @var string $description
 	 */
 	protected $description;
+    
+    /**
+     * This is an <code>ArrayAccess</code>-object that contains all objects
+     * that belong to this <code>StructureGroup</code>
+     * 
+     * @var ArrayAccess $groupables
+     */
+    protected $groupables;
 
     /**
      * Simple constructor that set's up the dynamic properties.
      */
     public function __construct() {
         parent::__construct(array(
-             'Id' => array(
-            	  		'name' => 'id', 'type' => 'integer', 'readonly' => true),
-             'Alias'       => array('name' => 'alias', 'type' => 'string'),
-             'Language'    => array('name' => 'language', 'type' => 'string'),
-             'Name'        => array('name' => 'Name', 'type' => 'string'),
-             'Description' => array('name' => 'description', 'type' => 'string')
+            'Id' => array(
+           	  		'name' => 'id', 'type' => 'integer', 'readonly' => true),
+            'Alias'       => array('name' => 'alias', 'type' => 'string'),
+            'Language'    => array('name' => 'language', 'type' => 'string'),
+            'Name'        => array('name' => 'name', 'type' => 'string'),
+            'Description' => array('name' => 'description', 'type' => 'string'),
+            'Groupables'  => array(
+                    'name' => 'groupables', 'type' => 'ArrayAccess'),
              ));
+             
+        $this->groupables = new ArrayObject();
     }
 }
 ?>

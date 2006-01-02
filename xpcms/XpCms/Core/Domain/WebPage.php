@@ -2,7 +2,7 @@
 /**
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class WebPage extends DynamicPropertyObject {
 
@@ -54,11 +54,8 @@ class WebPage extends DynamicPropertyObject {
 	public function getCollection() {
 		// Do we have a collection instance or a collection foreign id?
 		if ($this->collection === null && $this->collectionId >= 0) {
-			// Create a mapper
-			$wcm = AbstractMapperFactory::getInstance(
-							)->createWebCollectionMapper();
-			// Retrieve the collection by its id
-			$this->collection = $wcm->findById($this->collectionId);
+			// Retrieve the collection by this
+			$this->collection = LazyLoadService::getInstance()->getCollectionByPage($this);
 		}
 		return $this->collection;
 	}

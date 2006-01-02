@@ -5,7 +5,7 @@
  *
  * @package XpCms.Core.Domain
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 class WebCollection extends DynamicPropertyObject implements IGroupable {
 
@@ -42,6 +42,14 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 	 * @var integer $groupId
 	 */
 	protected $groupId;
+    
+    /**
+     * The page class used to display this collection branch or 
+     * <code>null</code>.
+     * 
+     * @var string $pageClass
+     */
+    protected $pageClass;
 
 	/**
 	 * The associated <code>WebPage</code>-instance for the current language
@@ -78,11 +86,12 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 	 */
 	public function __construct() {
 		parent::__construct(array(
-			'Id'      => array(
+			'Id'        => array(
 					'name' => 'id',   'type' => 'integer', 'readonly' => true),
-            'Alias'   => array('name' => 'alias', 'type' => 'string'),
-			'Status'  => array('name' => 'status', 'type' => 'integer'),
-			'GroupId' => array('name' => 'groupId', 'type' => 'integer')
+            'Alias'     => array('name' => 'alias', 'type' => 'string'),
+			'Status'    => array('name' => 'status', 'type' => 'integer'),
+			'GroupId'   => array('name' => 'groupId', 'type' => 'integer'),
+            'PageClass' => array('name' => 'pageClass', 'type' => 'string')
 		));
 		// Init the collection container
 		$this->webCollections = new ArrayObject();
@@ -177,10 +186,10 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 	public function getWebPage() {
 		// We have no web page, so load it.
 		if ($this->webPage === null && $this->id !== null) {
-			// Create the mapper
-			$wpm = AbstractMapperFactory::getInstance()->createWebPageMapper();
+            // Get lazy load service
+            $lls = LazyLoadService::getInstance();
 			// Find the web page by this collection
-			$this->webPage = $wpm->findByCollection($this);
+			$this->webPage = $lls->getPageByCollection($this);
 			// Set this as parent
 			if ($this->webPage !== null) {
 				$this->webPage->setCollection($this);
@@ -210,11 +219,9 @@ class WebCollection extends DynamicPropertyObject implements IGroupable {
 	public function getStructureGroup() {
 		// If it doesn't exists we have to load it
 		if ($this->structureGroup === null && $this->groupId !== null) {
-			// Create the StructureGroupMapper
-			$sgm = AbstractMapperFactory::getInstance(
-								)->createStructureGroupMapper();
+            $service = LazyLoadService::getInstance();
 			// Try to find it
-			$this->structureGroup = $sgm->findById($this->groupId);
+			$this->structureGroup = $service->getStructureGroupByCollection($this);
 		}
 		return $this->structureGroup;
 	}
