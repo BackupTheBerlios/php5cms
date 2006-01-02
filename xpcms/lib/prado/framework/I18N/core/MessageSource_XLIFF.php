@@ -13,7 +13,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:38 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:31:37 $
  * @package System.I18N.core
  */
 
@@ -307,7 +307,7 @@ class MessageSource_XLIFF extends MessageSource
 		
     	
     	$fileNode = $xpath->query('//file')->item(0);
-    	$fileNode->setAttribute('date', date('Y-m-d\TH:i:s\Z'));
+    	$fileNode->setAttribute('date', @date('Y-m-d\TH:i:s\Z'));
     	
     	//save it and clear the cache for this variant
     	$dom->save($filename);
@@ -391,7 +391,7 @@ class MessageSource_XLIFF extends MessageSource
 		}
 		
     	$fileNode = $xpath->query('//file')->item(0);
-    	$fileNode->setAttribute('date', date('Y-m-d\TH:i:s\Z'));
+    	$fileNode->setAttribute('date', @date('Y-m-d\TH:i:s\Z'));
     			
 		if($dom->save($filename) >0)
 		{
@@ -442,7 +442,7 @@ class MessageSource_XLIFF extends MessageSource
 					$unit->parentNode->removeChild($unit);
 					
     				$fileNode = $xpath->query('//file')->item(0);
-    				$fileNode->setAttribute('date', date('Y-m-d\TH:i:s\Z'));
+    				$fileNode->setAttribute('date', @date('Y-m-d\TH:i:s\Z'));
     			
 					if($dom->save($filename) >0)
 					{

@@ -13,7 +13,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:38 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:31:38 $
  * @package System.I18N.core
  */
  
@@ -38,7 +38,7 @@
 * Mike BENOIT <ipso@snappymail.ca>
 *
 * @package System.I18N.core
-* @version $Id: TCache_Lite.php,v 1.1 2005/12/05 17:24:38 nexd Exp $
+* @version $Id: TCache_Lite.php,v 1.2 2006/01/02 17:31:38 nexd Exp $
 * @author Fabien MARTY <fab@php.net>
 */
 class TCache_Lite

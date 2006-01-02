@@ -1,4 +1,6 @@
-// Simplified Chinese lang variables contributed by cube316 (cube316@etang.com)
+// Simplified Chinese lang variables contributed by tom_cat (thomaswangyang@gmail.com)
 
-tinyMCELang['lang_iespell_desc'] = '运行拼写检查';
-tinyMCELang['lang_iespell_download'] = "未检测到ieSpell拼写检查，点击 OK 前往下载页面。"
+tinyMCE.addToLang('',{
+iespell_desc : '运行拼写检查',
+iespell_download : "未检测到 ieSpell 拼写检查，点击 OK 前往下载页面。"
+});

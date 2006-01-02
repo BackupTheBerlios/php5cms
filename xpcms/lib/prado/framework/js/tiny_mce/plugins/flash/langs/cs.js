@@ -1,6 +1,14 @@
-// UK lang variables
+/**
+ * Czech lang variables 
+ * encoding: utf-8
+ *  
+ * $Id: cs.js,v 1.2 2006/01/02 17:31:40 nexd Exp $ 
+ */  
 
-tinyMCELang['lang_insert_flash']      = 'Vložit/editovat Flash Movie';
-tinyMCELang['lang_insert_flash_file'] = 'Flash soubor (.swf)';
-tinyMCELang['lang_insert_flash_size'] = 'Velikost';
-tinyMCELang['lang_flash_props'] = 'Flash properties';
+tinyMCE.addToLang('',{
+insert_flash : 'Vložit/editovat Flash Movie',
+insert_flash_file : 'Flash soubor (.swf)',
+insert_flash_size : 'Velikost',
+insert_flash_list : 'Seznam',
+flash_props : 'Vlastnosti Flash'
+});

@@ -165,6 +165,7 @@ Prado.Validation.Util.focus = function(element)
 	var obj = $(element);
 	if(isObject(obj) && isdef(obj.focus))
 		setTimeout(function(){ obj.focus(); }, 100);
+	return false;
 }
 
 /**
@@ -188,10 +189,25 @@ Prado.Validation.summaries = [];
  */
 Prado.Validation.groups = [];
 
+
+/**
+ * Second type of grouping.
+ */
+Prado.Validation.TargetGroups = [];
+
+
+/**
+ * Current Target group.
+ */
+Prado.Validation.CurrentTargetGroup = null;
+
+Prado.Validation.HasTargetGroup = false;
+
 /**
  * Targets that can cause validation.
  */
 Prado.Validation.ActiveTarget = null;
+
 
 /**
  * Determine if group validation is active.
@@ -212,10 +228,19 @@ Prado.Validation.AddForm = function(id)
  * can cause validation.
  * @param {string} target id
  */
-Prado.Validation.AddTarget = function(id)
+Prado.Validation.AddTarget = function(id, group)
 {
 	var target = $(id);	
-	Event.observe(target, "click", function(){ Prado.Validation.ActiveTarget = target;});
+	Event.observe(target, "click", function()
+	{
+		Prado.Validation.ActiveTarget = target;
+		Prado.Validation.CurrentTargetGroup = Prado.Validation.TargetGroups[id];
+	});
+	if(group)
+	{
+		Prado.Validation.TargetGroups[id] = group;
+		Prado.Validation.HasTargetGroup = true;
+	}
 }
 
 /**
@@ -262,7 +287,7 @@ Prado.Validation.IsValid = function(form)
 {
 	var valid = true;
 	var validators = Prado.Validation.validators;
-		
+	
 	for(var i = 0; i < validators.length; i++)
 	{
 		//prevent validating multiple forms
@@ -270,7 +295,12 @@ Prado.Validation.IsValid = function(form)
 		//when group validation, only validators in the active group are visible.
 		validators[i].visible = Prado.Validation.IsGroupValidation ? validators[i].inActiveGroup() : true;
 
-		//validate each validator
+		if(Prado.Validation.HasTargetGroup)
+		{
+			if(validators[i].group != Prado.Validation.CurrentTargetGroup)
+				validators[i].enabled = false;
+		}
+
 		valid &= validators[i].validate();
 	}
 
@@ -305,6 +335,7 @@ Prado.Validation.prototype =
 		this.control = $(attr.controltovalidate);
 		this.enabled = isdef(attr.enabled) ? attr.enabled : true;
 		this.visible = isdef(attr.visible) ? attr.visible : true;
+		this.group = isdef(attr.validationgroup) ? attr.validationgroup : null;
 		this.isValid = true;
 		Prado.Validation.validators.push(this);
 		if(this.evaluateIsValid)
@@ -430,6 +461,7 @@ Prado.Validation.Summary.prototype =
 		this.div = $(attr.id);
 		this.visible = false;
 		this.enabled = false;
+		this.group = isdef(attr.validationgroup) ? attr.validationgroup : null;
 		Prado.Validation.summaries.push(this);
 	},
 
@@ -446,6 +478,16 @@ Prado.Validation.Summary.prototype =
 			if(refresh)
 				Element.hide(this.div); 
 			return;
+		}
+
+		if(Prado.Validation.HasTargetGroup)
+		{
+			if(Prado.Validation.CurrentTargetGroup != this.group)
+			{
+				if(refresh)
+					Element.hide(this.div); 
+					return;
+			}
 		}
 		
 		if(this.attr.showsummary != "False" && refresh)
@@ -613,6 +655,7 @@ Prado.Validation.OnSubmit = function(ev)
 
 	//reset the target
 	Prado.Validation.ActiveTarget = null;
+	//Prado.Validation.CurrentTargetGroup = null;
 
 	return valid;
 }

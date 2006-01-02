@@ -71,8 +71,7 @@ var _13=this.options.postBody?this.options.postBody:_12;
 this.transport.send(this.options.method=="post"?_13:null);
 }
 catch(e){
-(this.options.onException||Prototype.emptyFunction)(this,e);
-Ajax.Responders.dispatch("onException",this,e);
+this.dispatchException(e);
 }
 },setRequestHeaders:function(){
 var _14=["X-Requested-With","XMLHttpRequest","X-Prototype-Version",Prototype.Version];
@@ -93,48 +92,75 @@ var _16=this.transport.readyState;
 if(_16!=1){
 this.respondToReadyState(this.transport.readyState);
 }
-},evalJSON:function(){
+},header:function(_17){
 try{
-var _17=this.transport.getResponseHeader("X-JSON"),object;
-object=eval(_17);
-return object;
+return this.transport.getResponseHeader(_17);
 }
 catch(e){
+}
+},evalJSON:function(){
+try{
+return eval(this.header("X-JSON"));
+}
+catch(e){
+}
+},evalResponse:function(){
+try{
+return eval(this.transport.responseText);
+}
+catch(e){
+this.dispatchException(e);
 }
 },respondToReadyState:function(_18){
 var _19=Ajax.Request.Events[_18];
 var _20=this.transport,json=this.evalJSON();
 if(_19=="Complete"){
+try{
 (this.options["on"+this.transport.status]||this.options["on"+(this.responseIsSuccess()?"Success":"Failure")]||Prototype.emptyFunction)(_20,json);
 }
+catch(e){
+this.dispatchException(e);
+}
+if((this.header("Content-type")||"").match(/^text\/javascript/i)){
+this.evalResponse();
+}
+}
+try{
 (this.options["on"+_19]||Prototype.emptyFunction)(_20,json);
 Ajax.Responders.dispatch("on"+_19,this,_20,json);
+}
+catch(e){
+this.dispatchException(e);
+}
 if(_19=="Complete"){
 this.transport.onreadystatechange=Prototype.emptyFunction;
 }
+},dispatchException:function(_21){
+(this.options.onException||Prototype.emptyFunction)(this,_21);
+Ajax.Responders.dispatch("onException",this,_21);
 }});
 Ajax.Updater=Class.create();
-Ajax.Updater.ScriptFragment="(?:<script.*?>)((\n|.)*?)(?:</script>)";
-Object.extend(Object.extend(Ajax.Updater.prototype,Ajax.Request.prototype),{initialize:function(_21,url,_22){
-this.containers={success:_21.success?$(_21.success):$(_21),failure:_21.failure?$(_21.failure):(_21.success?null:$(_21))};
+Object.extend(Object.extend(Ajax.Updater.prototype,Ajax.Request.prototype),{initialize:function(_22,url,_23){
+this.containers={success:_22.success?$(_22.success):$(_22),failure:_22.failure?$(_22.failure):(_22.success?null:$(_22))};
 this.transport=Ajax.getTransport();
-this.setOptions(_22);
-var _23=this.options.onComplete||Prototype.emptyFunction;
-this.options.onComplete=(function(_24,_25){
+this.setOptions(_23);
+var _24=this.options.onComplete||Prototype.emptyFunction;
+this.options.onComplete=(function(_25,_26){
 this.updateContent();
-_23(_24,_25);
+_24(_25,_26);
 }).bind(this);
 this.request(url);
 },updateContent:function(){
-var _26=this.responseIsSuccess()?this.containers.success:this.containers.failure;
-var _27=new RegExp(Ajax.Updater.ScriptFragment,"img");
-var _28=this.transport.responseText.replace(_27,"");
-var _29=this.transport.responseText.match(_27);
-if(_26){
+var _27=this.responseIsSuccess()?this.containers.success:this.containers.failure;
+var _28=this.transport.responseText;
+if(!this.options.evalScripts){
+_28=_28.stripScripts();
+}
+if(_27){
 if(this.options.insertion){
-new this.options.insertion(_26,_28);
+new this.options.insertion(_27,_28);
 }else{
-_26.innerHTML=_28;
+Element.update(_27,_28);
 }
 }
 if(this.responseIsSuccess()){
@@ -142,23 +168,15 @@ if(this.onComplete){
 setTimeout(this.onComplete.bind(this),10);
 }
 }
-if(this.options.evalScripts&&_29){
-_27=new RegExp(Ajax.Updater.ScriptFragment,"im");
-setTimeout((function(){
-for(var i=0;i<_29.length;i++){
-eval(_29[i].match(_27)[1]);
-}
-}).bind(this),10);
-}
 }});
 Ajax.PeriodicalUpdater=Class.create();
-Ajax.PeriodicalUpdater.prototype=Object.extend(new Ajax.Base(),{initialize:function(_30,url,_31){
-this.setOptions(_31);
+Ajax.PeriodicalUpdater.prototype=Object.extend(new Ajax.Base(),{initialize:function(_29,url,_30){
+this.setOptions(_30);
 this.onComplete=this.options.onComplete;
 this.frequency=(this.options.frequency||2);
 this.decay=(this.options.decay||1);
 this.updater={};
-this.container=_30;
+this.container=_29;
 this.url=url;
 this.start();
 },start:function(){
@@ -168,10 +186,10 @@ this.onTimerEvent();
 this.updater.onComplete=undefined;
 clearTimeout(this.timer);
 (this.onComplete||Prototype.emptyFunction).apply(this,arguments);
-},updateComplete:function(_32){
+},updateComplete:function(_31){
 if(this.options.decay){
-this.decay=(_32.responseText==this.lastText?this.decay*this.options.decay:1);
-this.lastText=_32.responseText;
+this.decay=(_31.responseText==this.lastText?this.decay*this.options.decay:1);
+this.lastText=_31.responseText;
 }
 this.timer=setTimeout(this.onTimerEvent.bind(this),this.decay*this.frequency*1000);
 },onTimerEvent:function(){

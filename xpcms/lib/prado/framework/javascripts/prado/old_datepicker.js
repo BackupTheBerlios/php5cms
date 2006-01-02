@@ -1,7 +1,7 @@
 //
 // calendar -- a javascript date picker designed for easy localization.
 //
-// $Id: old_datepicker.js,v 1.1 2005/12/05 17:24:42 nexd Exp $
+// $Id: old_datepicker.js,v 1.2 2006/01/02 17:31:39 nexd Exp $
 //
 //
 // Author: Per Norrman (pernorrman@telia.com)

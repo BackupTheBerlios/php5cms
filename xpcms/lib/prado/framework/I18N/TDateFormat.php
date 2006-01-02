@@ -13,7 +13,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Xiang Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:42 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:31:39 $
  * @package System.I18N
  */
  
@@ -150,7 +150,7 @@ class TDateFormat extends TI18NControl
 		$value = $this->getViewState('Value','');
 		if(empty($value))
 		{
-			$text = parent::renderBody();
+			$text = trim(parent::renderBody());
 			if(empty($text))
 				return time();
 			else
@@ -185,7 +185,6 @@ class TDateFormat extends TI18NControl
 		$culture = $this->getCulture();
 
 		$value = $this->getValue();
-		
 		//return the specific cultural formatted date time
 		if(strlen($culture) && $app->Culture !== $culture)
 		{

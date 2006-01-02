@@ -3,6 +3,38 @@
  */
 Prado.AutoCompleter = Class.create();
 
+
+/**
+ * Overrides parent implementation of updateElement by trimming the value.
+ */
+Prado.AutoCompleter.Base = function(){};
+Prado.AutoCompleter.Base.prototype = Object.extend(Autocompleter.Base.prototype,
+{
+  updateElement: function(selectedElement) 
+  {
+    if (this.options.updateElement) {
+      this.options.updateElement(selectedElement);
+      return;
+    }
+
+    var value = Element.collectTextNodesIgnoreClass(selectedElement, 'informal');
+    var lastTokenPos = this.findLastToken();
+    if (lastTokenPos != -1) {
+      var newValue = this.element.value.substr(0, lastTokenPos + 1);
+      var whitespace = this.element.value.substr(lastTokenPos + 1).match(/^\s+/);
+      if (whitespace)
+        newValue += whitespace[0];
+      this.element.value = (newValue + value).trim();
+    } else {
+      this.element.value = value.trim();
+    }
+    this.element.focus();
+    
+    if (this.options.afterUpdateElement)
+      this.options.afterUpdateElement(this.element, selectedElement);
+  }
+});
+
 /**
  * Based on the Prototype Autocompleter class.
  * This client-side component should be instantiated from a Prado component.
@@ -108,8 +140,9 @@ Prado.ActivePanel.Request.prototype =
 	{
 		if(this.options.update)
 		{
-			var element = $(this.options.update)
-			if(element) element.innerHTML = output;
+			if (!this.options.evalScripts)
+				output = output.stripScripts();
+			Element.update(this.options.update, output);
 		}
 	}
 }
@@ -128,7 +161,7 @@ Prado.DropContainer.prototype = Object.extend(new Prado.ActivePanel.Request(),
 		{
 			onDrop : this.onDrop.bind(this),
 			evalScripts : true,
-			onSuccess : options.onSuccess || this.update.bind(this)
+			onSuccess : options.onSuccess || this.onSuccess.bind(this)
 		});
 		Droppables.add(element, this.options);
 	},
@@ -136,12 +169,5 @@ Prado.DropContainer.prototype = Object.extend(new Prado.ActivePanel.Request(),
 	onDrop : function(draggable, droppable)
 	{
 		this.callback(draggable.id)
-	},
-
-	update : function(result, output)
-	{
-		this.onSuccess(result, output);
-		if (this.options.evalScripts)
-			Prado.AJAX.EvalScript(output);
 	}
 });

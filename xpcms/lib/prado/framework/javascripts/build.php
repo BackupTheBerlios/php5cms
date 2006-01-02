@@ -14,7 +14,6 @@ $outputs[] = '../../../petshop/js/';
 
 /* javascript library files */
 
-/*
 //base javascript functions
 $lib_files['base.js'][] = 'prototype/prototype.js';
 $lib_files['base.js'][] = 'prototype/compat.js';
@@ -30,6 +29,7 @@ $lib_files['base.js'][] = 'prototype/hash.js';
 $lib_files['base.js'][] = 'prototype/range.js';
 $lib_files['base.js'][] = 'extended/functional.js';
 $lib_files['base.js'][] = 'prado/prado.js';
+$lib_files['base.js'][] = 'effects/builder.js';
 
 //dom functions
 $lib_files['dom.js'][] = 'prototype/dom.js';
@@ -40,25 +40,23 @@ $lib_files['dom.js'][] = 'extended/event.js';
 $lib_files['dom.js'][] = 'prototype/position.js';
 $lib_files['dom.js'][] = 'extra/getElementsBySelector.js';
 $lib_files['dom.js'][] = 'extra/behaviour.js';
-$lib_files['dom.js'][] = 'effects/util.js';
 
 //effects
 $lib_files['effects.js'][] = 'effects/effects.js';
 
-*/
 //controls
+$lib_files['controls.js'][] = 'effects/slider.js';
 $lib_files['controls.js'][] = 'effects/controls.js';
 $lib_files['controls.js'][] = 'effects/dragdrop.js';
 $lib_files['controls.js'][] = 'prado/controls.js';
 
 //logging
-//$lib_files['logger.js'][] = 'extra/logger.js';
+$lib_files['logger.js'][] = 'extra/logger.js';
 
-//$lib_files['ajax.js'][] = 'prototype/ajax.js';
-//$lib_files['ajax.js'][] = 'prado/ajax.js';
-//$lib_files['ajax.js'][] = 'prado/json.js';
+$lib_files['ajax.js'][] = 'prototype/ajax.js';
+$lib_files['ajax.js'][] = 'prado/ajax.js';
+$lib_files['ajax.js'][] = 'prado/json.js';
 
-/*
 //rico
 $lib_files['rico.js'][] = 'effects/rico.js';
 
@@ -71,30 +69,78 @@ $lib_files['validator.js'][] = 'prado/validators.js';
 
 //date picker
 $lib_files['datepicker.js'][] = 'prado/datepicker.js';
-*/
 
 /*============ Build the javascript files =========*/
 
-foreach($lib_files as $output_file => $lib)
+/**
+ * Collect specific libraries to be built from command line
+ */
+if(isset($argc))
 {
-	$files = get_library_files($library, $lib);
-	$compressed = get_compressed_content($files);
-	save_contents($outputs, $output_file, $compressed);
+	if($argc < 2)
+		print_usage($lib_files);		
+	else
+	{
+		array_shift($argv);
+		build_these($argv, $library, $lib_files, $outputs);
+	}
 }
-
-
-
+elseif(isset($_GET['lib']))
+{
+	build_these(explode(",", $_GET['lib']), $library, $lib_files, $outputs);
+}
+else
+{
+	die("Please run build.php from the command line.");
+}
 
 
 /*============ utility functions ==============*/
 
+function print_usage($lib_files)
+{
+	echo "Usage:     php build.php [libraries]\n\n";
+	echo "Example:   php build.php base validator dom\n\n";
+	$available = get_available_libs($lib_files);
+	echo "[libraries]:\t".implode("\n\t\t", $available);
+	echo "\n\nTry: php build.php all\n";
+}
+
+function get_available_libs($lib_files)
+{
+	$available = array();
+	foreach($lib_files as $lib => $file)
+		$available[] = substr($lib, 0, -3) ;
+	return $available;
+}
+
+function build_these($files, $library, $lib_files, $outputs)
+{
+	if(count($files) == 1 && $files[0] == 'all')
+		$files = get_available_libs($lib_files);
+	foreach($files as $file)
+	{
+		$lib = "{$file}.js";
+		if(isset($lib_files[$lib]))
+		{
+			echo str_repeat("=", 60)."\n";
+			echo "Creating {$lib}\n";
+			echo str_repeat("-", 60)."\n";
+			$list = get_library_files($library, $lib_files[$lib]);
+			$compressed = get_compressed_content($list);
+			save_contents($outputs, $lib, $compressed);
+		}
+	}
+}
+
 function save_contents($outputs, $output_file, $contents)
 {
+	echo "\n";
 	$tmp_file = $output_file.'.tmp';
 	file_put_contents($tmp_file, $contents);
 	copy_files($outputs, $tmp_file, $output_file);
-	echo "Saving to <b>{$output_file}.</b></br></br>\n\n";
 	unlink($tmp_file);
+	echo "\n\n";
 }
 
 function get_library_files($lib_dir, $lib_files)
@@ -105,7 +151,7 @@ function get_library_files($lib_dir, $lib_files)
 		if(is_file($lib_dir.$file))
 			$files[] = $lib_dir.$file;
 		else
-			echo '<b>File not found '.$lib_dir.$file.'</b>';
+			echo 'File not found '.$lib_dir.$file."\n";
 	}
 	return $files;
 }
@@ -130,7 +176,7 @@ function rhino_compress($input, $output)
 	$find = array('INPUT', 'OUTPUT');
 	$replace =  array($input, $output);
 	$command = str_replace($find, $replace, $command);
-	echo "Compressing {$input} <br/>\n".
+	echo "   adding \t\t {$input}\n".
 	system($command);
 }
 
@@ -138,7 +184,12 @@ function rhino_compress($input, $output)
 function copy_files($outputs, $source, $filename)
 {
 	foreach($outputs as $dir)
-		copy($source, $dir.$filename);
+	{
+		if(copy($source, $dir.$filename))
+			echo "   saving as \t\t{$dir}{$filename}\n";
+		else
+			echo " ! Error in saving {$dir}{$filename} !\n";
+	}
 }
 
 ?>

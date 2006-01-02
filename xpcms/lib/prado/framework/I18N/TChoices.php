@@ -12,7 +12,7 @@
  * {@link http://prado.sourceforge.net/}
  *
  * @author Xiang Wei Zhuo <weizhuo[at]gmail[dot]com>
- * @version $Revision: 1.1 $  $Date: 2005/12/05 17:24:42 $
+ * @version $Revision: 1.2 $  $Date: 2006/01/02 17:31:39 $
  * @package System.I18N
  */
 
