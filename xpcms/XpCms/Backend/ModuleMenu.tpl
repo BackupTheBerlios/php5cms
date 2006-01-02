@@ -1,10 +1,7 @@
 <div>
-  <com:TRepeater ID="BackendMenu">
+  <com:TRepeater ID="BackendMenu" OnItemCreated="ModuleMenu_OnItemCreated">
     <prop:ItemTemplate>
-      [<a href="<%= $this->Parent->Data->getURL() %>"
-          title="<%= $this->Parent->Data->getWebPage()->Description %>">
-      <%= $this->Parent->Data->getWebPage()->Name %>
-      </a>]
+      [<com:THyperLink ID="ProductLink" />]
     </prop:ItemTemplate>
   </com:TRepeater>
 </div>
