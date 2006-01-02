@@ -7,13 +7,23 @@
 
   <cache enabled="true" />
 
+  <vsmanager enabled="true" />
+  
+  	<globalization class="XpCmsGlobalization"
+                 defaultCharset="ISO-8859-1" 
+                 defaultCulture="en-GB">
+    <translation type="XLIFF" source="XpCms/messages" autosave="true" />
+  </globalization>
+      
+  
   <parameter name="alias">
     <alias name="backend_menu" value="backend" />
     <alias name="website_structure" value="web_site" />
+    <alias name="CompleteWebSiteStructure" value="complete_web_site_structure" />
   </parameter>
   
   <parameter name="persistence">
-    <persistence name="content" type="Sql" dsn="mysql://xpcms:xpcms@localhost/xpcms" />
+    <persistence name="content" type="Creole" dsn="mysql://xpcms:xpcms@localhost/xpcms" />
   </parameter>
   
   <parameter name="language">
@@ -21,9 +31,12 @@
     <available lang="de_DE,en_GB" />
   </parameter>
   
+  <using namespace="System.I18N" />
   <using namespace="System.Web" />
   <using namespace="System.Web.UI" />
   <using namespace="System.Web.UI.WebControls" />
+  
+  <alias name="ThirdParty" path="../lib/ThirdParty" />
 
   <alias name="XpCms" path="." />
 
@@ -32,6 +45,7 @@
   <using namespace="XpCms.Core.Domain" />
   <using namespace="XpCms.Core.Persistence" />
   <using namespace="XpCms.Core.Service" />
+  <using namespace="XpCms.Util" />
   
   <module ID="WebContent" class="WebContentModule">
     <using namespace="XpCms.WebContent" />
@@ -48,15 +62,6 @@
     <secured page="EditPage" />
     -->
     <parameter name="AllowNewAccount">true</parameter>
-  </module>
-
-  <module ID="Blog" class="DataModule">
-    <using namespace="BlogApp.BlogModule" />
-    <!--
-    <secured page="EditPage" />
-    <secured page="NewPage" />
-    -->
-    <parameter name="AllowAllDelete">true</parameter>
   </module>
 
 </application>
