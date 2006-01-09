@@ -20,8 +20,8 @@
     <div id="mainContentHelp">
       <div class="contentBoxHeaderLeft"></div>
       <div class="contentBoxHeaderRight"></div>
-      <div class="contentBoxHeaderCenter">Hilfe</div>
-      <div class="contentBoxBody">Some help text here</div>
+      <div class="contentBoxHeaderCenter"><com:TTranslate>Help</com:TTranslate></div>
+      <div class="contentBoxBody"><com:TLiteral ID="MainContentHelp" /></div>
     </div>
     </com:TForm>
   </body>
