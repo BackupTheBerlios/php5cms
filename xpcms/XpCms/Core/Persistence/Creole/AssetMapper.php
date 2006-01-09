@@ -13,7 +13,7 @@ require_once 'XpCms/Core/Persistence/ORM/QueryBuilder.php';
  *  
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
     
@@ -176,12 +176,17 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
         
         $rs = $stmt->executeQuery();
         
+        $existingGroups = array();
+        
         $groups = new ArrayObject();
         
         while ($rs->next()) {
             $asset = $this->populateAsset($rs);
 
-            if (!$groups->offsetExists($asset->GroupId)) {
+            if (!isset($existingGroups[$asset->GroupId])) {
+                
+                $offset = sizeof($existingGroups);
+                $existingGroups[$asset->GroupId] = $offset;
                 
                 $group = new StructureGroup();
                 $group->Id          = $asset->GroupId;
@@ -190,11 +195,11 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
                 $group->Name        = $rs->getString('group_name');
                 $group->Description = $rs->getString('group_desc'); 
                 
-                $groups->offsetSet($asset->GroupId, $group);
+                $groups->offsetSet($offset, $group);
                 
             }
             
-            $groups->offsetGet($asset->GroupId)->Groupables[] = $asset;
+            $groups->offsetGet($existingGroups[$asset->GroupId])->Groupables[] = $asset;
         }
         return $groups;
     }
