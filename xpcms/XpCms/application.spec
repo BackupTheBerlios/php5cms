@@ -20,6 +20,7 @@
     <alias name="backend_menu" value="backend" />
     <alias name="website_structure" value="web_site" />
     <alias name="CompleteWebSiteStructure" value="complete_web_site_structure" />
+    <alias name="WebPageAssetGroups" value="web_page_asset_groups" />
   </parameter>
   
   <parameter name="persistence">
