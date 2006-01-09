@@ -17,6 +17,8 @@ require_once 'XpCms/Core/Persistence/Creole/CreoleMapperFactory.php';
  * Window - Preferences - PHPeclipse - PHP - Code Templates
  */
 abstract class BasePersistenceTestCase extends BaseTestCase {
+    
+    const DEFAULT_LOCALE = 'de_DE';
 
 	protected $validType = 'Creole';
 	protected $validDSN  = 'mysql://xpcms:xpcms@localhost/xpcms';

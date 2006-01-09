@@ -133,5 +133,26 @@ class ContentServiceTestCase extends BaseTestCase {
             $this->assertTrue($coll instanceof WebCollection);
         }   
     }
+    
+    /*
+     * Tries toi find all assets in their groups or empty groups for a page
+     */
+    public function testFindWebPageAssetGroups() {
+        
+        $service = ContentService::getInstance(); 
+        
+        $emptyPage = $service->getWebCollectionByAliasPath('/inactive')->getWebPage();
+        $dataPage  = $service->getWebCollectionByAliasPath('/project/xpcms/')->getWebPage();
+        
+        $groups1 = $service->getAssetGroups($dataPage);
+        $this->assertNotNull($groups1);
+        $this->assertTrue($groups1->count() > 0, 'Expected a filled result');
+        $this->assertTrue($groups1[0]->Groupables->offsetGet(0) instanceof AbstractAsset, 'Expected a filled StructureGroup');
+        
+        $groups2 = $service->getAssetGroups($emptyPage);
+        $this->assertNotNull($groups2);
+        $this->assertTrue($groups2->count() > 0, 'Expected a filled result');
+        $this->assertEquals($groups2->count(), $groups1->count());
+    }
 }
 ?>
