@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.0">
-  <file original="XpCms Messages" source-language="EN" datatype="plaintext" date="2005-12-28T11:25:55Z">
+  <file original="XpCms Messages" source-language="EN" datatype="plaintext" date="2006-01-08T12:57:07Z">
     <body>
 
       <trans-unit id="1">
@@ -27,7 +27,36 @@
         <source>Website Assets</source>
         <target>Seiten Objekte</target>
       </trans-unit>
-    
-    </body>
+      
+      <trans-unit id="6">
+        <source>Text-Asset</source>
+        <target>Text-Objekt</target>
+      </trans-unit>
+      
+      <trans-unit id="7">
+        <source>Link-Asset</source>
+        <target>Link-Objekt</target>
+      </trans-unit>
+      
+      <trans-unit id="8">
+        <source>Image-Asset</source>
+        <target>Bild-Objekt</target>
+      </trans-unit>
+      
+      <trans-unit id="9">
+        <source>Help</source>
+        <target>Hilfe</target>
+      </trans-unit>
+      
+      <trans-unit id="10">
+        <source>Edit the content of this element.</source>
+        <target>Den Inhalt dieses Elements bearbeiten.</target>
+      </trans-unit>
+
+<trans-unit id="11">
+<source>Headline:</source>
+<target></target>
+</trans-unit>
+</body>
   </file>
 </xliff>

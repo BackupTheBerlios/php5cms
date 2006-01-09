@@ -27,6 +27,32 @@
         <source>Website Assets</source>
         <target />
       </trans-unit>
+      
+      <trans-unit id="6">
+        <source>Text-Asset</source>
+        <target />
+      </trans-unit>
+      
+      <trans-unit id="7">
+        <source>Link-Asset</source>
+        <target />
+      </trans-unit>
+      
+      <trans-unit id="8">
+        <source>Image-Asset</source>
+        <target />
+      </trans-unit>
+      
+      <trans-unit id="9">
+        <source>Help</source>
+        <target />
+      </trans-unit>
+      
+      <trans-unit id="10">
+        <source>Edit the content of this element.</source>
+        <target />
+      </trans-unit>
+      
     </body>
   </file>
 </xliff>
