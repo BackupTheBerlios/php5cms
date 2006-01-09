@@ -5,7 +5,7 @@
  * 
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class StructureGroupMapper 
     extends AbstractBaseMapper 
@@ -109,7 +109,7 @@ class StructureGroupMapper
         }
         
         return $structureGroup;
-	}  
+	}
     
     /**
      * This method returns a <code>ArrayAccess</code>-object that contains all
@@ -136,7 +136,9 @@ class StructureGroupMapper
                          sg1.alias = ? AND
                          sg2.group_fid = sg1.id AND
                          sgd1.group_fid = sg2.id AND
-                         sgd1.language = ?', 
+                         sgd1.language = ?
+                   ORDER BY
+                         sg2.position ASC', 
                   $this->groupTableName, 
                   $this->groupTableName,
                   $this->detailTableName);
