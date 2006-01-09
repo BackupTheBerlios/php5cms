@@ -5,10 +5,10 @@
   <prop:ItemTemplate>
     <li class="groupListItem">
       <div class="groupListItemBorder">
-        <com:TLinkButton ID="GroupLink" />
-        <span class="objectToolBar">
+        <div class="objectToolBar">
           <com:TImageButton ID="NewCollectionButton" ImageUrl="/media/ico/collection-add.png" />
-        </span>
+        </div>
+        <com:TLinkButton ID="GroupLink" />
       </div>
       <com:WebCollectionList ID="CollectionList" />
     </li>

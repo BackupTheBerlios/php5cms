@@ -9,7 +9,7 @@ using('System.Web.Services');
  * 
  * @package XpCms.WebContent
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 class StructureEditPage extends TCallbackPage {
 
@@ -44,6 +44,25 @@ class StructureEditPage extends TCallbackPage {
     
     public function AssetGroups_OnItemCreated($sender, $param) {
         
+        $item = $param->item;
+        $legend = $item->AssetFieldSetLegend;
+        
+        $legend->Text = $item->Data->Name;
+        
+        $assets = $item->AssetObjects;
+        $assets->setDataSource($item->Data->Groupables);
+        $assets->dataBind();
+    }
+    
+    public function AssetObjects_OnItemCreated($sender, $param) {
+        // Create View Class Name for the context asset 
+        $control   = get_class($param->item->Data) . 'View';
+        // Create asset view component
+        $component = $this->createComponent($control);
+        // Associate asset view with asset
+        $component->Asset = $param->item->Data;
+        // Add component to list
+        $sender->addBody($component);
     }
     
     public function checkCollectionAlias($sender, $param) {

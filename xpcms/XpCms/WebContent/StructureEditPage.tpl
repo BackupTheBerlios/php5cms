@@ -21,15 +21,15 @@
 <!--
 <com:ButtonWithCallBack ID="Button1" Text="Do XMLHTTPRequest" />
 -->
-  <fieldset>
-    <legend><com:TTranslate>Website Assets</com:TTranslate></legend>
     <com:TRepeater ID="AssetGroups" OnItemCreated="Page.AssetGroups_OnItemCreated">
       <prop:ItemTemplate>
-        <div class="formLine">
-          <com:TTextBox Text="#$this->Parent->Data->Name" />
-          Manuel
-        </div>
+        <fieldset>
+          <legend><com:TLiteral ID="AssetFieldSetLegend" /></legend>
+          <com:TRepeater ID="AssetObjects" OnItemCreated="Page.AssetObjects_OnItemCreated">
+            <prop:ItemTemplate>
+            </prop:ItemTemplate>
+          </com:TRepeater>
+        </fieldset>
       </prop:ItemTemplate>
     </com:TRepeater>
-  </fieldset>
 </com:TContent>

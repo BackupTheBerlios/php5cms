@@ -97,14 +97,23 @@ class StructurePage extends TPage {
         }
     }
     
-    
+    /**
+     * This method is called if the user clicks on the collection edit button
+     * in the frontend. Then it redirects the request to the 
+     * {@link StructureEditPage} with the selected <code>WebCollection</code> as
+     * parameter.
+     * 
+     * @param TComponent $sender The clicked button.
+     * @param TEventParameter $param This is not used by the method.
+     */
     public function OnEditWebCollectionClicked($sender, $param) {
         
-        CollectionUtil::getPageClassAndAliasPath(
-                $sender->getParent()->Data, $pageClass, $aliasPath);
+        $collectionInfo = CollectionUtil::getPageClassAndAliasPath(
+                                                    $sender->getParent()->Data);
         
         $this->Application->transfer(
-            'WebContent:StructureEdit', array('alias' => $aliasPath));
+                'WebContent:StructureEdit', array(
+                        'alias' => $collectionInfo->aliasPath));
     }
     
     
