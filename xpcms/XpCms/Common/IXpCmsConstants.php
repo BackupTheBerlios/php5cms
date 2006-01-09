@@ -10,5 +10,7 @@ interface IXpCmsConstants {
     const BACKEND_MENU_ALIAS = 'backend_menu';
     
     const WEBSITE_STRUCTURE_ALIAS = 'CompleteWebSiteStructure';
+    
+    const WEB_PAGE_ASSET_GROUPS = 'WebPageAssetGroups';
 }
 ?>
