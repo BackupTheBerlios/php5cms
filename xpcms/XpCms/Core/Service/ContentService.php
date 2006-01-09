@@ -5,7 +5,7 @@
  * 
  * @package XpCms.Core.Service
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class ContentService {
 	
@@ -176,36 +176,28 @@ class ContentService {
      */
     public function getAssetGroups(WebPage $webPage) {
         // Create the asset mapper instance
-        $asf = $this->contentFactory->createAssetMapper();
-        // Query asset groups.
-        $assetGroups = $asf->findByWebPage(
-                                $webPage->getId(), $webPage->getLanguage());
-        return $assetGroups;
-    }
-    
-    /**
-     * Helper method that allows you to the the requested language for a 
-     * query. This method just changes the value if the given <code>$lang</code>
-     * is not <code>null</code>. If it is not <code>null</code> it returns the 
-     * previous language setting. This value could be used to reset to the 
-     * default value after a query.
-     * 
-     * @param IConfigurable $mapper Any mapper that implements this interface.
-     * @param string $lang The language that should be used.
-     * @return string The old language setting.
-     */
-    private function setQueryLanguage(IConfigurable $mapper, $lang) {
-        // Temp variable for the current language settings.
-        $tmpLang = null;
-        // Is the given parameter not null?
-        if ($lang != null) {
-            // Store current language settings in the temporary variable
-            $tmpLang = $mapper->getProperty(IConfigurable::LANGUAGE);
-            // Set new value
-            $mapper->setProperty(IConfigurable::LANGUAGE, $lang);
+        $asm = $this->contentFactory->createAssetMapper();
+        // Create structure group mapper
+        $sgm = $this->contentFactory->createStructureGroupMapper();
+        
+        // Get all groups for assets
+        $groups = $sgm->findSubGroupsByAlias($this->config->getGroupAlias(
+                   IXpCmsConstants::WEB_PAGE_ASSET_GROUPS), $webPage->Language);
+        
+        // Query filled asset groups.
+        $assetGroups = $asm->findByWebPage($webPage->Id, $webPage->Language);
+        
+        // Merge all defined groups with filled groups
+        foreach ($groups as $group) {
+            foreach ($assetGroups as $assetGroup) {
+                if ($assetGroup->Id == $group->Id) {
+                    $group->Groupables = $assetGroup->Groupables;
+                    break;
+                }
+            }
         }
-        // Return null or old value
-        return $tmpLang;
+                                
+        return $groups;
     }
 }
 ?>
