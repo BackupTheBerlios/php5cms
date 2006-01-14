@@ -13,7 +13,7 @@ abstract class AbstractAsset extends DynamicPropertyObject {
     
     protected $language;
     
-    protected $name;
+    protected $alias;
     
     protected $description;
     
@@ -31,7 +31,7 @@ abstract class AbstractAsset extends DynamicPropertyObject {
             'CollectionId' => array(
                     'name' => 'collectionId', 'type' => 'integer'),
             'Language'    => array('name' => 'language', 'type' => 'string'),
-            'Name'        => array('name' => 'name', 'type' => 'string'),
+            'Alias'       => array('name' => 'alias', 'type' => 'string'),
             'Description' => array('name' => 'description', 'type' => 'string'),
             'Status'      => array('name' => 'status', 'type' => 'integer'),
             'GroupId'     => array('name' => 'groupId', 'type' => 'integer'),

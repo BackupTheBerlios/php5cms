@@ -13,7 +13,7 @@ require_once 'XpCms/Core/Persistence/ORM/QueryBuilder.php';
  *  
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
     
@@ -32,7 +32,7 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
                                   a1.id AS asset_id, 
                                   a1.collection_fid AS asset_coll_fid, 
                                   a1.language AS asset_lang,
-                                  a1.name AS asset_name, 
+                                  a1.alias AS asset_alias, 
                                   a1.description AS asset_desc,
                                   a1.state AS asset_status,
                                   sg1.alias AS group_alias,
@@ -60,7 +60,7 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
                                   a1.id AS asset_id, 
                                   a1.collection_fid AS asset_coll_fid, 
                                   a1.language AS asset_lang,
-                                  a1.name AS asset_name, 
+                                  a1.alias AS asset_alias, 
                                   a1.description AS asset_desc,
                                   a1.state AS asset_status,
                                   sg1.alias AS group_alias,
@@ -222,7 +222,7 @@ class AssetMapper extends AbstractBaseMapper implements IAssetMapper {
         $asset->Status       = $rs->getInt('asset_status');
         $asset->Position     = $rs->getInt('asset_pos');
         $asset->Language     = $rs->getString('asset_lang');
-        $asset->Name         = $rs->getString('asset_name');
+        $asset->Alias        = $rs->getString('asset_alias');
         $asset->Description  = $rs->getString('asset_desc'); 
         
         foreach ($mapping['map'] as $map) {

@@ -10,7 +10,7 @@ class AssetTextView extends AbstractAssetView {
     public function onLoad($param) {
         parent::onLoad($param);
         
-        $this->AssetName->Text        = $this->asset->Name;
+        $this->AssetName->Text        = $this->asset->Alias;
         $this->AssetTextTitle->Text   = $this->asset->Title;
         $this->AssetTextContent->Text = $this->asset->Content; 
     }
