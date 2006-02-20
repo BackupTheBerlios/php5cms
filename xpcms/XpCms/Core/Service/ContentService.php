@@ -5,7 +5,7 @@
  * 
  * @package XpCms.Core.Service
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 class ContentService {
 	
@@ -80,7 +80,7 @@ class ContentService {
      * This method returns an <code>ArrayAccess</code> instance that holds all
      * top level <code>WebCollection</code> that belong to the given alias.
      * 
-     * @param string $alias The frontent alias name for this collection group
+     * @param string $alias The frontend alias name for this collection group
      * @param string $locale The language that should be used for the request.
      */
 	public function getWebCollectionsByAlias($alias, $locale = null) {
@@ -163,6 +163,13 @@ class ContentService {
         $wcm = $this->contentFactory->createWebCollectionMapper();
         // Query collection
         return $wcm->findByAliasPath($aliasArray, $locale); 
+    }
+    
+    public function saveWebCollection(WebCollection $collection) {
+        // Create an instance of IWebCollectionMapper
+        $wcm = $this->contentFactory->createWebCollectionMapper();
+        // Insert or update WebCollection
+        $wcm->save($collection);
     }
     
     /**

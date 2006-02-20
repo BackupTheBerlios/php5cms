@@ -21,7 +21,7 @@ GROUP BY
 
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class WebCollectionMapper
     extends AbstractBaseMapper
@@ -508,182 +508,28 @@ class WebCollectionMapper
                     'The given WebCollection has no WebPage.');
         }
 
-		$parentId = -1;
-		// Get the parent id. If it is a new root collection this id is -1.
-		if (($parentCollection = $collection->getParentCollection()) !== null) {
-			$parentId = $parentCollection->getId();
-		}
-		// Select the parent and the last child if it exists.
-		$sql = sprintf(
-               		'SELECT sgns1.lft, sgns1.rgt, sgns1.collection_fid FROM
-			      	   %s AS sgns1, %s AS sgns2
-			         WHERE
-			           (sgns1.group_fid = ? AND sgns1.collection_fid = ?)
-			           OR
-			           (sgns2.group_fid = ? AND sgns2.collection_fid = ? AND
-			           sgns2.lft != sgns2.rgt - 1 AND sgns1.rgt = sgns2.rgt - 1)
-			         GROUP BY sgns1.collection_fid
-                     ORDER BY sgns1.lft ASC',
-			    		$this->nestedSetTableName, $this->nestedSetTableName);
-
-	    // Prepare the sql query
-	    $stmt = $this->conn->prepareStatement($sql);
-
-	    // Set the params
-	    $stmt->setInt(1, $structureGroup->getId());
-	    $stmt->setInt(2, $parentId);
-	    $stmt->setInt(3, $structureGroup->getId());
-	    $stmt->setInt(4, $parentId);
-	    $stmt->setOffset(0);
-	    $stmt->setLimit(2);
-
-	    // Let's execute
-		$rs = $stmt->executeQuery();
-
-		// If there is no result something was wrong
-		if (($recCount = $rs->getRecordCount()) == 0 || !$rs->first()) {
-			throw new Exception(
-				'Something goes wrong. Either the StructureGroup or the ' .
-				'parent WebCollection doesn\'t exist.');
-		}
-
-		$ctxEntry = array();
-
-		// First child
-		if ($recCount == 1) {
-
-			$ctxEntry = array(
-				'lft' => $rs->getInt('lft'),
-				'rgt' => $rs->getInt('rgt'),
-				'id'  => $rs->getInt('collection_fid'));
-
-			$update1 = sprintf(
-							'UPDATE %s
-					       	    SET lft       = lft + 2
-					          WHERE group_fid = ?
-					            AND lft       > ?',
-					    		$this->nestedSetTableName);
-		    $update2 = sprintf(
-		    					'UPDATE %s
-		    					    SET rgt        = rgt + 2
-		    					  WHERE group_fid  = ?
-		    					    AND rgt       >= ?',
-		    					$this->nestedSetTableName);
-		    $insert1 = sprintf(
-		    					'INSERT INTO %s
-		    					   (group_fid, collection_fid, lft, rgt)
-		    					 VALUES
-		    					   (?, ?, ?, ? + 1)',
-		    					$this->nestedSetTableName);
-			$insert2 = sprintf(
-							'INSERT INTO %s
-							   (id, status, alias) VALUES (?, ?, ?)',
-							$this->collTableName);
-            $insert3 = sprintf(
-                            'INSERT INTO %s
-                               (collection_fid, page_class) VALUES (?, ?)',
-                            $this->pageClassTableName);
-		// Has a previous brother
-		} else {
-			// Move to the second record
-			$rs->next();
-
-			$ctxEntry = array(
-				'lft' => $rs->getInt('lft'),
-				'rgt' => $rs->getInt('rgt'),
-				'id'  => $rs->getInt('collection_fid'));
-
-			$update1 = sprintf(
-							'UPDATE %s
-					       	    SET lft       = lft + 2
-					          WHERE group_fid = ?
-					            AND lft       > ?',
-					    		$this->nestedSetTableName);
-		    $update2 = sprintf(
-		    					'UPDATE %s
-		    					    SET rgt        = rgt + 2
-		    					  WHERE group_fid  = ?
-		    					    AND rgt        > ?',
-		    					$this->nestedSetTableName);
-		    $insert1 = sprintf(
-		    					'INSERT INTO %s
-		    					   (group_fid, collection_fid, lft, rgt)
-		    					 VALUES
-		    					   (?, ?, ? + 1, ? + 2)',
-		    					$this->nestedSetTableName);
-			$insert2 = sprintf(
-							'INSERT INTO %s
-							   (id, status, alias) VALUES (?, ?, ?)',
-							$this->collTableName);
-            $insert3 = sprintf(
-                            'INSERT INTO %s
-                               (collection_fid, page_class) VALUES (?, ?)',
-                            $this->pageClassTableName);
-		}
-
-		$rs->close();
-		$stmt->close();
-
-		try {
-
-			$this->conn->begin();
-
-			$id = $this->getNewPrimaryKey($this->collTableName, 'id');
-
-			// Update left values
-			$stmt = $this->conn->prepareStatement($update1);
-			$stmt->setInt(1, $structureGroup->getId());
-			$stmt->setInt(2, $ctxEntry['rgt']);
-			$stmt->executeUpdate();
-			$stmt->close();
-
-			// Update right values
-			$stmt = $this->conn->prepareStatement($update2);
-			$stmt->setInt(1, $structureGroup->getId());
-			$stmt->setInt(2, $ctxEntry['rgt']);
-			$stmt->executeUpdate();
-			$stmt->close();
-
-			// Insert new nested set record
-			$stmt = $this->conn->prepareStatement($insert1);
-			$stmt->setInt(1, $structureGroup->getId());
-			$stmt->setInt(2, $id);
-			$stmt->setInt(3, $ctxEntry['rgt']);
-			$stmt->setInt(4, $ctxEntry['rgt']);
-			$stmt->executeUpdate();
-			$stmt->close();
-
-			// Insert new collection
-			$stmt = $this->conn->prepareStatement($insert2);
-			$stmt->setInt(1, $id);
-			$stmt->setInt(2, $collection->getStatus());
-            $stmt->setString(3, (string) $collection->getAlias());
-			$stmt->executeUpdate();
-			$stmt->close();
-           
-            // If a page class is set save the third record!
-            if (($pageClass = $collection->getPageClass()) !== null) {
-                $stmt = $this->conn->prepareStatement($insert3);
-                $stmt->setInt(1, $id);
-                $stmt->setString(2, $pageClass);
-                $stmt->executeUpdate();
-                $stmt->close();                
+        $id = $collection->Id;
+        try {
+            
+            $this->conn->begin();
+            
+            if (is_int($id) && $id >= 0) {   
+                $this->updateWebCollection($collection);
+            } else {
+                $this->insertWebCollection($collection);
             }
-
-            // Set the id for this collection.
-            $collection->setId($id);
+            
             // Create a IWebPageMapper instance
             $wpm = AbstractMapperFactory::getInstance()->createWebPageMapper();
             // Save the associated WebPage
             $wpm->save($webPage);
-
-			#$this->conn->rollback();
-			$this->conn->commit();
-		} catch (Exception $e) {
-			$this->conn->rollback();
-
-            throw new Exception($e->getMessage(), $e->getCode());
-		}
+            
+            $this->conn->commit();
+            
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            throw $e;
+        }
 
 	}
 
@@ -809,6 +655,188 @@ class WebCollectionMapper
             $this->conn->rollback();
         }
 	}
+    
+    private function updateWebCollection(WebCollection $collection) {
+        
+    }
+    
+    private function insertWebCollection(WebCollection $collection) {
+        
+        $parentId = -1;
+        // Get the parent id. If it is a new root collection this id is -1.
+        if (($parentCollection = $collection->getParentCollection()) !== null) {
+            $parentId = $parentCollection->getId();
+        }
+        
+        $structureGroup = $collection->getStructureGroup();
+        
+        // Select the parent and the last child if it exists.
+        $sql = sprintf(
+                    'SELECT sgns1.lft, sgns1.rgt, sgns1.collection_fid FROM
+                       %s AS sgns1, %s AS sgns2
+                     WHERE
+                       (sgns1.group_fid = ? AND sgns1.collection_fid = ?)
+                       OR
+                       (sgns2.group_fid = ? AND sgns2.collection_fid = ? AND
+                       sgns2.lft != sgns2.rgt - 1 AND sgns1.rgt = sgns2.rgt - 1)
+                     GROUP BY sgns1.collection_fid
+                     ORDER BY sgns1.lft ASC',
+                        $this->nestedSetTableName, $this->nestedSetTableName);
+
+        // Prepare the sql query
+        $stmt = $this->conn->prepareStatement($sql);
+
+        // Set the params
+        $stmt->setInt(1, $structureGroup->getId());
+        $stmt->setInt(2, $parentId);
+        $stmt->setInt(3, $structureGroup->getId());
+        $stmt->setInt(4, $parentId);
+        $stmt->setOffset(0);
+        $stmt->setLimit(2);
+
+        // Let's execute
+        $rs = $stmt->executeQuery();
+
+        // If there is no result something was wrong
+        if (($recCount = $rs->getRecordCount()) == 0 || !$rs->first()) {
+            throw new Exception(
+                'Something goes wrong. Either the StructureGroup or the ' .
+                'parent WebCollection doesn\'t exist.');
+        }
+
+        $ctxEntry = array();
+
+        // First child
+        if ($recCount == 1) {
+
+            $ctxEntry = array(
+                'lft' => $rs->getInt('lft'),
+                'rgt' => $rs->getInt('rgt'),
+                'id'  => $rs->getInt('collection_fid'));
+
+            $update1 = sprintf(
+                            'UPDATE %s
+                                SET lft       = lft + 2
+                              WHERE group_fid = ?
+                                AND lft       > ?',
+                                $this->nestedSetTableName);
+            $update2 = sprintf(
+                                'UPDATE %s
+                                    SET rgt        = rgt + 2
+                                  WHERE group_fid  = ?
+                                    AND rgt       >= ?',
+                                $this->nestedSetTableName);
+            $insert1 = sprintf(
+                                'INSERT INTO %s
+                                   (group_fid, collection_fid, lft, rgt)
+                                 VALUES
+                                   (?, ?, ?, ? + 1)',
+                                $this->nestedSetTableName);
+            $insert2 = sprintf(
+                            'INSERT INTO %s
+                               (id, status, alias) VALUES (?, ?, ?)',
+                            $this->collTableName);
+            $insert3 = sprintf(
+                            'INSERT INTO %s
+                               (collection_fid, page_class) VALUES (?, ?)',
+                            $this->pageClassTableName);
+        // Has a previous brother
+        } else {
+            // Move to the second record
+            $rs->next();
+
+            $ctxEntry = array(
+                'lft' => $rs->getInt('lft'),
+                'rgt' => $rs->getInt('rgt'),
+                'id'  => $rs->getInt('collection_fid'));
+
+            $update1 = sprintf(
+                            'UPDATE %s
+                                SET lft       = lft + 2
+                              WHERE group_fid = ?
+                                AND lft       > ?',
+                                $this->nestedSetTableName);
+            $update2 = sprintf(
+                                'UPDATE %s
+                                    SET rgt        = rgt + 2
+                                  WHERE group_fid  = ?
+                                    AND rgt        > ?',
+                                $this->nestedSetTableName);
+            $insert1 = sprintf(
+                                'INSERT INTO %s
+                                   (group_fid, collection_fid, lft, rgt)
+                                 VALUES
+                                   (?, ?, ? + 1, ? + 2)',
+                                $this->nestedSetTableName);
+            $insert2 = sprintf(
+                            'INSERT INTO %s
+                               (id, status, alias) VALUES (?, ?, ?)',
+                            $this->collTableName);
+            $insert3 = sprintf(
+                            'INSERT INTO %s
+                               (collection_fid, page_class) VALUES (?, ?)',
+                            $this->pageClassTableName);
+        }
+
+        $rs->close();
+        $stmt->close();
+
+        try {
+
+            $this->conn->begin();
+
+            $id = $this->getNewPrimaryKey($this->collTableName, 'id');
+
+            // Update left values
+            $stmt = $this->conn->prepareStatement($update1);
+            $stmt->setInt(1, $structureGroup->getId());
+            $stmt->setInt(2, $ctxEntry['rgt']);
+            $stmt->executeUpdate();
+            $stmt->close();
+
+            // Update right values
+            $stmt = $this->conn->prepareStatement($update2);
+            $stmt->setInt(1, $structureGroup->getId());
+            $stmt->setInt(2, $ctxEntry['rgt']);
+            $stmt->executeUpdate();
+            $stmt->close();
+
+            // Insert new nested set record
+            $stmt = $this->conn->prepareStatement($insert1);
+            $stmt->setInt(1, $structureGroup->getId());
+            $stmt->setInt(2, $id);
+            $stmt->setInt(3, $ctxEntry['rgt']);
+            $stmt->setInt(4, $ctxEntry['rgt']);
+            $stmt->executeUpdate();
+            $stmt->close();
+
+            // Insert new collection
+            $stmt = $this->conn->prepareStatement($insert2);
+            $stmt->setInt(1, $id);
+            $stmt->setInt(2, $collection->getStatus());
+            $stmt->setString(3, (string) $collection->getAlias());
+            $stmt->executeUpdate();
+            $stmt->close();
+           
+            // If a page class is set save the third record!
+            if (($pageClass = $collection->getPageClass()) !== null) {
+                $stmt = $this->conn->prepareStatement($insert3);
+                $stmt->setInt(1, $id);
+                $stmt->setString(2, $pageClass);
+                $stmt->executeUpdate();
+                $stmt->close();                
+            }
+
+            // Set the id for this collection.
+            $collection->setId($id);
+
+            $this->conn->commit();
+        } catch (Exception $e) {
+            $this->conn->rollback();
+
+            throw new Exception($e->getMessage(), $e->getCode());
+        }
+    }
     
     /**
      * This method creates a collection tree from the given sql

@@ -1,5 +1,8 @@
 <%@Page Master="BackendLayoutPage" %>
 <com:TContent ID="MainBodyContent">
+  <div class="mainToolBar">
+    <com:TImageButton ID="SaveWebCollection" ImageUrl="/media/ico/save.png" OnClick="Page.onClickWebCollectionSave" />
+  </div>
   <fieldset>
     <legend><com:TTranslate>Website Properties</com:TTranslate></legend>
       

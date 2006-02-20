@@ -9,6 +9,8 @@ class AbstractAssetView extends AbstractAssetControl {
     
     public function onLoad($param) {
         parent::onLoad($param);
+        
+        $this->AssetAlias->Text = $this->asset->Alias;
     }
     
 }

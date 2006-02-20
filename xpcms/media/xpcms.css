@@ -1,3 +1,6 @@
+body {
+	margin: 0px;padding:0px;
+}
 a, li, span, div {
 	color: #000000;
     font-family: Verdana,Arial;
@@ -27,6 +30,11 @@ fieldset label {
 	float: left;
 	width: 100px;
 	color: #000000;
+}
+fieldset .assetContentView img {
+	border: 0px;
+	max-width: 550px;
+	height: auto;
 }
 input.textField {
 	border: 1px solid #cccccc;
@@ -170,6 +178,27 @@ div.assetContentView {
 	border-width: 0px 1px 1px 1px;
 	margin-bottom: 10px;
 	padding: 5px 0px 5px 100px;
+}
+div.mainToolBar {
+	background-color: #F0F0EE;
+	border-color: #cccccc;
+	border-style: solid;
+	border-width: 0px 0px 1px 0px;
+	height: 22px;
+	margin: 0px;
+	padding: 0px;
+}
+div.mainToolBar input, div.mainToolBar input:hover {
+	margin: 1px;
+	padding: 2px;
+	height: 16px;
+	width: 16px;
+}
+div.mainToolBar input:hover {
+	border: 1px solid #0A246A !important;
+	cursor: arrow;
+	background-color: #B6BDD2;
+	margin: 0px;
 }
 
 li.tabItem {

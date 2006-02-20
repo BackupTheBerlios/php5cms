@@ -9,7 +9,7 @@ using('System.Web.Services');
  * 
  * @package XpCms.WebContent
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 class StructureEditPage extends TCallbackPage {
 
@@ -65,6 +65,18 @@ class StructureEditPage extends TCallbackPage {
         $sender->addBody($component);
     }
     
+    public function onClickWebCollectionSave() {
+        $alias = $this->Request->getParameter('alias');
+        
+        $webColl = $this->Module->getWebCollection($alias);
+        $webPage = $webColl->getWebPage();
+        
+        
+        
+        $service = ContentService::getInstance();
+        $service->saveWebCollection($webColl);
+    }
+    
     public function checkCollectionAlias($sender, $param) {
        if($this->IsCallback)
        {
@@ -116,7 +128,7 @@ class ButtonWithCallBack extends TButton implements ICallbackEventHandler
         $script = '
             function ButtonWithCallBack_UpdateUI(result)
             {
-                alert(result);
+                alert(Position.cumulativeOffset($("' . $this->getClientID() . '")));
             }
         ';
         

@@ -4,7 +4,7 @@
  *
  * @package XpCms.Core.Persistence.Creole
  * @author Manuel Pichler <manuel.pichler@xplib.de>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
 
@@ -326,12 +326,9 @@ class WebPageMapper extends AbstractBaseMapper implements IWebPageMapper {
     		$stmt->setInt(5,    $webPage->getId());
     		
     		// Execute the query.
-    		$affected = $stmt->executeUpdate();
-    		
-    		if ($affected != 1) {
-    			$stmt->close();
-    			throw new Exception('Some unknown error occured.');
-    		}
+    		$stmt->executeUpdate();
+   		// Close resource
+		$stmt->close();
     }
 }
 ?>

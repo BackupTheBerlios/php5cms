@@ -40,8 +40,8 @@ class StructurePage extends TPage {
 
         $link = $item->GroupLink;
         $link->setEncodeText(false);
-        $link->Text = '<span>'.$item->Data->Name.'</span>';       
-        $link->setAttribute('title',$item->Data->Description);
+        $link->Text = $item->Data->Name;       
+        $link->setAttribute('title', $item->Data->Description);
         
         $item->CollectionList->setDataSource($item->Data->Groupables);
         $item->CollectionList->dataBind();

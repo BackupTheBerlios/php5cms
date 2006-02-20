@@ -1,4 +1,4 @@
-#Sun Jan 08 13:01:09 CET 2006
+#Sat Jan 14 10:17:26 CET 2006
 eclipse.preferences.version=1
 encoding//XpCms/Backend/BackendView.tpl=UTF-8
 encoding//XpCms/Backend/ModuleMenu.tpl=UTF-8
@@ -6,6 +6,7 @@ encoding//XpCms/WebContent/AbstractAssetControl.spec=UTF-8
 encoding//XpCms/application.spec=UTF-8
 encoding//lib/prado/examples/I18N/application.spec=UTF-8
 encoding//lib/prado/framework/Web/UI/WebControls/THtmlArea.spec=UTF-8
+encoding//lib/prado/framework/Web/UI/WebControls/THyperLink.spec=UTF-8
 encoding//lib/prado/framework/Web/UI/WebControls/TImage.spec=UTF-8
 encoding//lib/prado/framework/Web/UI/WebControls/TImageButton.spec=UTF-8
 encoding//lib/prado/framework/Web/UI/WebControls/TListControl.spec=UTF-8

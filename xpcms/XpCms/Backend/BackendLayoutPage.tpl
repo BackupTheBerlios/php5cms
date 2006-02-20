@@ -4,6 +4,7 @@
     <link href="/media/xpcms.css" rel="stylesheet" />
   </com:THead>
   <body>
+    <h1 style="margin:5px 20px 0px 0px;text-align:right;">XpCms</h1>
     <com:TForm>
     <com:ModuleMenu ID="Dummy" />
     <div id="mainContent">

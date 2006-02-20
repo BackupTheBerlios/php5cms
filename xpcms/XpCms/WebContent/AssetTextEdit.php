@@ -1,19 +1,15 @@
 <?php
 /*
- * Created on 18.12.2005
+ * Created on 14.01.2006
  *
  * To change the template for this generated file go to
  * Window - Preferences - PHPeclipse - PHP - Code Templates
  */
-class AssetPage extends TPage {
-    
+class AssetTextEdit extends AbstractAssetEditControl {
     
     public function onLoad($param) {
         parent::onLoad($param);
         
-        if (!$this->IsPostBack) {
-            
-        }
     }
     
 }
